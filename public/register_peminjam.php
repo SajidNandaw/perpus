@@ -28,218 +28,168 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 ?>
 
 <style>
-    /* === CARD REGISTER WATER THEME === */
-    .login-card {
-        background:
-            radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 55%),
-            radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.22), transparent 60%),
-            linear-gradient(160deg, rgba(15, 23, 42, 0.98), rgba(8, 47, 73, 0.98) 60%, rgba(15, 23, 42, 1));
-        border: 1px solid rgba(56, 189, 248, 0.45);
-        padding: 28px;
-        border-radius: 18px;
-        box-shadow:
-            0 24px 55px rgba(15, 23, 42, 0.95),
-            0 0 32px rgba(56, 189, 248, 0.4);
-        transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease, background .35s ease;
-        position: relative;
-        overflow: hidden;
-        backdrop-filter: blur(16px);
+    .register-wrapper {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
-    .login-card::before {
-        content: "";
-        position: absolute;
-        inset: -40%;
-        background:
-            radial-gradient(circle at 20% 0%, rgba(125, 211, 252, 0.25), transparent 55%),
-            radial-gradient(circle at 80% 110%, rgba(56, 189, 248, 0.18), transparent 60%);
-        opacity: 0;
-        transition: opacity .5s ease;
-        pointer-events: none;
-        z-index: 0;
+    .register-card {
+        background: #0b1120; /* dark navy */
+        border: 1px solid #1f2937;
+        border-radius: 10px;
+        padding: 24px 20px;
     }
 
-    .login-card:hover {
-        transform: translateY(-6px);
-        box-shadow:
-            0 28px 65px rgba(8, 47, 73, 1),
-            0 0 45px rgba(56, 189, 248, 0.6);
-        border-color: rgba(56, 189, 248, 0.8);
+    .register-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #e5e7eb;
+        text-align: center;
+        letter-spacing: 0.12em;
     }
 
-    .login-card:hover::before {
-        opacity: 1;
-    }
-
-    .login-title {
-        text-shadow:
-            0 0 14px rgba(56, 189, 248, 0.8),
-            0 0 30px rgba(37, 99, 235, 0.7);
-        letter-spacing: 3px;
-        color: #e0f2fe;
-        position: relative;
-    }
-
-    .login-title::after {
-        content: "";
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: -8px;
-        width: 80px;
-        height: 3px;
-        border-radius: 999px;
-        background: linear-gradient(90deg, #0ea5e9, #38bdf8, #0ea5e9);
-        box-shadow: 0 0 14px rgba(56, 189, 248, 0.9);
-    }
-
-    /* INPUTS & TEXTAREA */
-    input,
-    textarea {
-        background: rgba(15, 23, 42, 0.95);
-        border: 1px solid rgba(148, 163, 184, 0.6);
-        color: #e0f2fe;
-        transition: border-color .3s ease, box-shadow .3s ease, background .3s ease, transform .2s ease;
-        border-radius: 0.75rem;
-    }
-
-    input::placeholder,
-    textarea::placeholder {
-        color: #64748b;
-    }
-
-    input:focus,
-    textarea:focus {
-        border-color: #38bdf8;
-        box-shadow:
-            0 0 0 1px rgba(56, 189, 248, 0.9),
-            0 0 18px rgba(56, 189, 248, 0.7);
-        outline: none;
-        background: radial-gradient(circle at top, rgba(15, 23, 42, 1), rgba(8, 47, 73, 0.95));
-        transform: translateY(-1px);
-    }
-
-    label {
-        color: #bae6fd;
-    }
-
-    /* BUTTON */
-    .btn-login {
-        background: linear-gradient(135deg, #0ea5e9, #2563eb);
-        transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
-        box-shadow:
-            0 14px 34px rgba(37, 99, 235, 0.8),
-            0 0 28px rgba(56, 189, 248, 0.8);
-        border-radius: 9999px;
-    }
-
-    .btn-login:hover {
-        background: linear-gradient(135deg, #38bdf8, #1d4ed8);
-        transform: translateY(-2px);
-        box-shadow:
-            0 18px 40px rgba(30, 64, 175, 0.95),
-            0 0 36px rgba(56, 189, 248, 1);
-    }
-
-    .btn-login:active {
-        transform: translateY(0);
-        box-shadow:
-            0 8px 22px rgba(15, 23, 42, 0.9),
-            0 0 20px rgba(56, 189, 248, 0.7);
-    }
-
-    /* TEXT BELOW */
-    .text-gray-400 {
+    .register-subtitle {
+        font-size: .9rem;
         color: #9ca3af;
+        text-align: center;
+        margin-top: 4px;
     }
 
-    .link-login {
-        color: #7dd3fc;
-        text-decoration-color: rgba(125, 211, 252, 0.7);
-        transition: color .25s ease, text-decoration-color .25s ease;
+    .reg-label {
+        font-size: .9rem;
+        color: #e5e7eb;
+        margin-bottom: 4px;
+        display: block;
     }
 
-    .link-login:hover {
-        color: #38bdf8;
-        text-decoration-color: rgba(56, 189, 248, 0.9);
+    .reg-input,
+    .reg-textarea {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: 1px solid #374151;
+        background: #020617;
+        color: #e5e7eb;
+        font-size: 0.9rem;
     }
 
-    /* ALERTS */
-    .alert-error {
+    .reg-input:focus,
+    .reg-textarea:focus {
+        outline: none;
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 1px #60a5fa;
+    }
+
+    .reg-btn {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 6px;
+        background: #16a34a;
+        color: #f9fafb;
+        font-weight: 600;
+        font-size: .95rem;
+    }
+
+    .reg-btn:hover {
+        background: #15803d;
+    }
+
+    .reg-error {
+        background: #7f1d1d;
+        border: 1px solid #b91c1c;
         color: #fecaca;
-        background: rgba(127, 29, 29, 0.25);
-        border: 1px solid rgba(248, 113, 113, 0.7);
-        border-radius: 9999px;
-        padding: 8px 14px;
-        box-shadow: 0 0 18px rgba(248, 113, 113, 0.5);
+        font-size: .85rem;
+        padding: 8px 10px;
+        border-radius: 6px;
+        text-align: center;
+        margin-bottom: 12px;
     }
 
-    .alert-success {
+    .reg-success {
+        background: #064e3b;
+        border: 1px solid #15803d;
         color: #bbf7d0;
-        background: rgba(5, 46, 22, 0.35);
-        border: 1px solid rgba(34, 197, 94, 0.8);
-        border-radius: 9999px;
-        padding: 8px 14px;
-        box-shadow: 0 0 18px rgba(34, 197, 94, 0.6);
+        font-size: .85rem;
+        padding: 8px 10px;
+        border-radius: 6px;
+        text-align: center;
+        margin-bottom: 12px;
+    }
+
+    .reg-bottom-text {
+        font-size: .85rem;
+        color: #9ca3af;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .reg-link {
+        color: #60a5fa;
+        text-decoration: underline;
+    }
+
+    .reg-link:hover {
+        color: #93c5fd;
     }
 </style>
 
-<div class="max-w-md mx-auto mt-24">
-    <div class="login-card">
+<div class="register-wrapper px-4">
+    <div class="w-full max-w-sm register-card">
 
-        <h2 class="text-3xl font-extrabold text-center mb-10 login-title">
-            REGISTER PEMINJAM
-        </h2>
+        <h2 class="register-title">REGISTER PEMINJAM</h2>
+        <p class="register-subtitle">Buat akun untuk meminjam buku</p>
 
         <!-- ERROR -->
         <?php if(!empty($err)): ?>
-            <div class="mb-4 text-center text-sm alert-error">
+            <div class="reg-error mt-4">
                 <?= htmlspecialchars($err) ?>
             </div>
         <?php endif; ?>
 
         <!-- SUKSES -->
         <?php if(!empty($sukses)): ?>
-            <div class="mb-4 text-center text-sm alert-success">
+            <div class="reg-success mt-4">
                 <?= htmlspecialchars($sukses) ?>
             </div>
         <?php endif; ?>
 
-        <form method="post" class="space-y-5 relative z-10">
+        <form method="post" class="mt-5 space-y-4">
 
             <div>
-                <label class="block mb-1 font-medium">Username</label>
-                <input name="username" class="w-full p-3" required>
+                <label class="reg-label">Username</label>
+                <input name="username" class="reg-input" required>
             </div>
 
             <div>
-                <label class="block mb-1 font-medium">Password</label>
-                <input type="password" name="password" class="w-full p-3" required>
+                <label class="reg-label">Password</label>
+                <input type="password" name="password" class="reg-input" required>
             </div>
 
             <div>
-                <label class="block mb-1 font-medium">Nama Lengkap</label>
-                <input name="nama_lengkap" class="w-full p-3">
+                <label class="reg-label">Nama Lengkap</label>
+                <input name="nama_lengkap" class="reg-input">
             </div>
 
             <div>
-                <label class="block mb-1 font-medium">Email</label>
-                <input type="email" name="email" class="w-full p-3">
+                <label class="reg-label">Email</label>
+                <input type="email" name="email" class="reg-input">
             </div>
 
             <div>
-                <label class="block mb-1 font-medium">Alamat</label>
-                <textarea name="alamat" class="w-full p-3" rows="3"></textarea>
+                <label class="reg-label">Alamat</label>
+                <textarea name="alamat" class="reg-textarea" rows="3"></textarea>
             </div>
 
-            <button class="btn-login w-full text-white py-2 font-semibold text-lg">
+            <button class="reg-btn mt-2">
                 Register
             </button>
         </form>
 
-        <div class="text-center text-gray-400 mt-6 text-sm">
+        <div class="reg-bottom-text">
             Sudah punya akun?
-            <a href="login.php" class="link-login underline">
+            <a href="login.php" class="reg-link">
                 Login
             </a>
         </div>

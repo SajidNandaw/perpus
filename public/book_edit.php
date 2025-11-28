@@ -5,33 +5,36 @@ $auth = new Auth($db->pdo());
 $auth->requireRole(['administrator','petugas']);
 
 $bookModel = new BookModel($db->pdo());
-$id = intval($_GET['id'] ?? 0);
+$id   = intval($_GET['id'] ?? 0);
 $book = $bookModel->find($id);
 
 if (!$book) {
     echo "Buku tidak ditemukan.";
+    require_once __DIR__.'/../templates/footer.php';
     exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $coverName = $book['cover']; // default pakai cover lama
+    // default pakai cover lama
+    $coverName = $book['cover'];
 
+    // jika upload cover baru
     if (!empty($_FILES['cover']['name'])) {
 
         $folder = __DIR__ . "/uploads/cover/";
-        if (!is_dir($folder)) mkdir($folder, 0777, true);
+        if (!is_dir($folder)) {
+            mkdir($folder, 0777, true);
+        }
 
-        $ext = strtolower(pathinfo($_FILES['cover']['name'], PATHINFO_EXTENSION));
+        $ext     = strtolower(pathinfo($_FILES['cover']['name'], PATHINFO_EXTENSION));
         $allowed = ['jpg','jpeg','png','webp'];
 
         if (in_array($ext, $allowed)) {
-
             $coverName = uniqid('cover_') . "." . $ext;
             move_uploaded_file($_FILES['cover']['tmp_name'], $folder . $coverName);
-
         } else {
-            $err = "Format file tidak valid.";
+            $err = "Format file tidak valid. Hanya jpg/jpeg/png/webp.";
         }
     }
 
@@ -45,241 +48,199 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <style>
-    /* === CARD EDIT BUKU WATER THEME === */
-    .edit-card {
-        background:
-            radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 55%),
-            radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.22), transparent 60%),
-            linear-gradient(160deg, rgba(15, 23, 42, 0.98), rgba(8, 47, 73, 0.98) 60%, rgba(15, 23, 42, 1));
-        border: 1px solid rgba(56, 189, 248, 0.45);
-        border-radius: 20px;
-        padding: 30px;
-        box-shadow:
-            0 24px 55px rgba(15, 23, 42, 0.95),
-            0 0 32px rgba(56, 189, 248, 0.4);
-        transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease, background .35s ease;
-        position: relative;
-        overflow: hidden;
-        backdrop-filter: blur(16px);
+    .page-wrapper {
+        margin-top: 1.5rem;
     }
 
-    .edit-card::before {
-        content: "";
-        position: absolute;
-        inset: -40%;
-        background:
-            radial-gradient(circle at 20% 0%, rgba(125, 211, 252, 0.25), transparent 55%),
-            radial-gradient(circle at 80% 110%, rgba(56, 189, 248, 0.2), transparent 60%);
-        opacity: 0;
-        transition: opacity .5s ease;
-        pointer-events: none;
-        z-index: 0;
+    .book-form-card {
+        max-width: 600px;
+        margin: 0 auto;
+        background: #020617;           /* simple dark, sama nuansa header */
+        border: 1px solid #1f2937;     /* gray-800 */
+        border-radius: 10px;
+        padding: 20px 18px;
     }
 
-    .edit-card:hover {
-        transform: translateY(-6px);
-        box-shadow:
-            0 28px 65px rgba(8, 47, 73, 1),
-            0 0 45px rgba(56, 189, 248, 0.65);
-        border-color: rgba(56, 189, 248, 0.85);
-    }
-
-    .edit-card:hover::before {
-        opacity: 1;
-    }
-
-    .edit-title {
-        font-size: 1.9rem;
-        font-weight: 800;
-        color: #e0f2fe;
-        text-shadow:
-            0 0 20px rgba(56, 189, 248, 0.9),
-            0 0 32px rgba(37, 99, 235, 0.8);
-        letter-spacing: 0.18em;
+    .book-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #e5e7eb;
+        letter-spacing: .08em;
         text-transform: uppercase;
-        margin-bottom: 1.5rem;
-        position: relative;
+        margin-bottom: 1rem;
     }
 
-    .edit-title::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: -8px;
-        width: 150px;
-        height: 3px;
-        border-radius: 999px;
-        background: linear-gradient(90deg, #0ea5e9, #38bdf8, #0ea5e9);
-        box-shadow: 0 0 14px rgba(56, 189, 248, 0.95);
+    .form-group {
+        margin-bottom: 12px;
     }
 
-    /* INPUTS & SELECT & FILE */
-    input,
-    select {
-        background: rgba(15, 23, 42, 0.95);
-        border: 1px solid rgba(148, 163, 184, 0.6);
-        color: #e0f2fe;
-        border-radius: 0.75rem;
-        padding: 10px;
-        transition: border-color .3s ease, box-shadow .3s ease, background .3s ease, transform .2s ease;
+    .book-label {
+        display: block;
+        margin-bottom: 4px;
+        font-size: .9rem;
+        color: #e5e7eb;
     }
 
-    input::placeholder,
-    select::placeholder {
-        color: #64748b;
+    .book-input {
+        width: 100%;
+        border-radius: 6px;
+        border: 1px solid #4b5563; /* gray-600 */
+        padding: 7px 9px;
+        font-size: .9rem;
+        background: #020617;
+        color: #e5e7eb;
     }
 
-    input:focus,
-    select:focus {
-        border-color: #38bdf8;
-        box-shadow:
-            0 0 0 1px rgba(56, 189, 248, 0.9),
-            0 0 18px rgba(56, 189, 248, 0.7);
+    .book-input:focus {
         outline: none;
-        background: radial-gradient(circle at top, rgba(15, 23, 42, 1), rgba(8, 47, 73, 0.95));
-        transform: translateY(-1px);
+        border-color: #60a5fa; /* blue-400 */
     }
 
-    label {
-        color: #bae6fd;
+    .book-file {
+        padding: 5px;
+        background: #020617;
+        color: #e5e7eb;
+        border-radius: 6px;
+        border: 1px solid #4b5563;
+        width: 100%;
+        font-size: .9rem;
     }
 
-    /* FILE INPUT SIMPLE RESET */
-    input[type="file"] {
-        padding: 8px;
-        background: rgba(15, 23, 42, 0.95);
-    }
-
-    /* PREVIEW COVER */
     .cover-preview {
-        box-shadow:
-            0 10px 24px rgba(15, 23, 42, 0.9),
-            0 0 20px rgba(56, 189, 248, 0.5);
-        border-radius: 0.75rem;
-        border: 1px solid rgba(15, 23, 42, 0.9);
+        margin-top: 8px;
+        width: 7rem;
+        border-radius: 6px;
+        border: 1px solid #1f2937;
     }
 
-    /* BUTTONS */
-    .btn-update {
-        background: linear-gradient(135deg, #0ea5e9, #2563eb);
-        padding: 10px 26px;
-        border-radius: 9999px;
-        font-weight: 600;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
-        box-shadow:
-            0 14px 34px rgba(37, 99, 235, 0.8),
-            0 0 28px rgba(56, 189, 248, 0.8);
-    }
-
-    .btn-update:hover {
-        background: linear-gradient(135deg, #38bdf8, #1d4ed8);
-        transform: translateY(-2px);
-        box-shadow:
-            0 18px 40px rgba(30, 64, 175, 0.95),
-            0 0 36px rgba(56, 189, 248, 1);
-    }
-
-    .btn-update:active {
-        transform: translateY(0);
-        box-shadow:
-            0 10px 22px rgba(15, 23, 42, 0.9),
-            0 0 20px rgba(56, 189, 248, 0.7);
+    .btn-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 14px;
     }
 
     .btn-cancel {
-        background: radial-gradient(circle at top, #1e293b, #020617);
-        padding: 10px 18px;
-        border-radius: 9999px;
-        font-weight: 500;
-        color: #e0f2fe;
-        border: 1px solid rgba(148, 163, 184, 0.7);
-        transition: transform .25s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease;
-        box-shadow:
-            0 12px 26px rgba(15, 23, 42, 0.95),
-            0 0 18px rgba(15, 23, 42, 0.9);
+        padding: 7px 14px;
+        border-radius: 6px;
+        border: 1px solid #4b5563;
+        background: #020617;
+        color: #e5e7eb;
+        font-size: .9rem;
     }
 
     .btn-cancel:hover {
-        background: radial-gradient(circle at top, #0f172a, #020617);
-        border-color: rgba(148, 163, 184, 1);
-        transform: translateY(-2px);
-        box-shadow:
-            0 16px 30px rgba(15, 23, 42, 1),
-            0 0 22px rgba(30, 64, 175, 0.6);
+        background: #0b1120;
     }
 
-    .btn-cancel:active {
-        transform: translateY(0);
+    .btn-save {
+        padding: 7px 18px;
+        border-radius: 6px;
+        background: #2563eb;
+        color: #f9fafb;
+        border: none;
+        font-size: .9rem;
+        font-weight: 600;
     }
 
-    /* ERROR ALERT */
+    .btn-save:hover {
+        background: #1d4ed8;
+    }
+
     .alert-error {
-        color: #fecaca;
-        background: rgba(127, 29, 29, 0.25);
-        border: 1px solid rgba(248, 113, 113, 0.7);
-        border-radius: 9999px;
-        padding: 8px 14px;
-        box-shadow: 0 0 18px rgba(248, 113, 113, 0.5);
+        margin-bottom: 10px;
+        padding: 8px 10px;
+        border-radius: 6px;
+        background: #7f1d1d;
+        color: #fee2e2;
+        font-size: .85rem;
     }
 </style>
 
-<div class="max-w-xl mx-auto mt-14 edit-card">
+<div class="page-wrapper">
+    <div class="book-form-card">
 
-    <h2 class="edit-title">Edit Buku</h2>
+        <h2 class="book-title">Edit Buku</h2>
 
-    <?php if (!empty($err)): ?>
-        <div class="alert-error mb-4"><?= htmlspecialchars($err) ?></div>
-    <?php endif; ?>
+        <?php if (!empty($err)): ?>
+            <div class="alert-error"><?= htmlspecialchars($err) ?></div>
+        <?php endif; ?>
 
-    <form method="post" enctype="multipart/form-data" class="space-y-5 relative z-10">
+        <form method="post" enctype="multipart/form-data">
 
-        <div>
-            <label class="block mb-1 font-medium">Judul</label>
-            <input name="judul" value="<?= htmlspecialchars($book['judul']) ?>" class="w-full">
-        </div>
+            <div class="form-group">
+                <label class="book-label">Judul</label>
+                <input
+                    class="book-input"
+                    name="judul"
+                    value="<?= htmlspecialchars($book['judul']) ?>"
+                    required
+                >
+            </div>
 
-        <div>
-            <label class="block mb-1 font-medium">Penulis</label>
-            <input name="penulis" value="<?= htmlspecialchars($book['penulis']) ?>" class="w-full">
-        </div>
+            <div class="form-group">
+                <label class="book-label">Penulis</label>
+                <input
+                    class="book-input"
+                    name="penulis"
+                    value="<?= htmlspecialchars($book['penulis']) ?>"
+                >
+            </div>
 
-        <div>
-            <label class="block mb-1 font-medium">Penerbit</label>
-            <input name="penerbit" value="<?= htmlspecialchars($book['penerbit']) ?>" class="w-full">
-        </div>
+            <div class="form-group">
+                <label class="book-label">Penerbit</label>
+                <input
+                    class="book-input"
+                    name="penerbit"
+                    value="<?= htmlspecialchars($book['penerbit']) ?>"
+                >
+            </div>
 
-        <div>
-            <label class="block mb-1 font-medium">Tahun Terbit</label>
-            <input type="number" name="tahun_terbit" value="<?= $book['tahun_terbit'] ?>" class="w-full">
-        </div>
+            <div class="form-group">
+                <label class="book-label">Tahun Terbit</label>
+                <input
+                    class="book-input"
+                    type="number"
+                    name="tahun_terbit"
+                    value="<?= htmlspecialchars($book['tahun_terbit']) ?>"
+                >
+            </div>
 
-        <div>
-            <label class="block mb-1 font-medium">Stok</label>
-            <input type="number" name="stok" value="<?= $book['stok'] ?>" class="w-full">
-        </div>
+            <div class="form-group">
+                <label class="book-label">Stok</label>
+                <input
+                    class="book-input"
+                    type="number"
+                    name="stok"
+                    value="<?= htmlspecialchars($book['stok']) ?>"
+                >
+            </div>
 
-        <div>
-            <label class="block mb-1 font-medium">Ganti Cover (Opsional)</label>
-            <input type="file" name="cover" accept="image/*" class="w-full">
+            <div class="form-group">
+                <label class="book-label">Ganti Cover (opsional)</label>
+                <input
+                    class="book-file"
+                    type="file"
+                    name="cover"
+                    accept="image/*"
+                >
 
-            <?php if ($book['cover']): ?>
-                <img src="uploads/cover/<?= $book['cover'] ?>" class="w-32 mt-3 rounded-lg cover-preview">
-            <?php endif; ?>
-        </div>
+                <?php if ($book['cover']): ?>
+                    <img
+                        src="uploads/cover/<?= htmlspecialchars($book['cover']) ?>"
+                        alt="Cover buku"
+                        class="cover-preview"
+                    >
+                <?php endif; ?>
+            </div>
 
-        <div class="flex justify-between mt-6">
-            <a href="books.php" class="btn-cancel text-sm sm:text-base">
-                Batal
-            </a>
+            <div class="btn-row">
+                <a href="books.php" class="btn-cancel">Batal</a>
+                <button class="btn-save">Update</button>
+            </div>
 
-            <button class="btn-update text-white text-sm sm:text-base">
-                Update
-            </button>
-        </div>
-
-    </form>
+        </form>
+    </div>
 </div>
 
 <?php require_once __DIR__.'/../templates/footer.php'; ?>

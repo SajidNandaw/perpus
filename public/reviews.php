@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../templates/header.php';
 
-$auth = new Auth($db->pdo());
+$auth    = new Auth($db->pdo());
 $isLogin = $auth->check();
 
 $bookModel   = new BookModel($db->pdo());
@@ -29,251 +29,281 @@ $reviewCount = $ratingData['count_review'] ?? 0;
 ?>
 
 <style>
-    /* CARD UTAMA DETAIL BUKU */
-    .card-water {
-        background: linear-gradient(160deg, #020617, #0f172a 55%, #020617);
-        border: 1px solid rgba(56, 189, 248, 0.4);
-        border-radius: 18px;
-        padding: 24px;
-        box-shadow: 0 16px 30px rgba(15, 23, 42, 0.85);
-        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-        position: relative;
-        overflow: hidden;
+    body {
+        background: #020617;
+        color: #e5e7eb;
     }
 
-    .card-water::before {
-        content: "";
-        position: absolute;
-        inset: -40%;
-        background:
-            radial-gradient(circle at 20% 0%, rgba(56, 189, 248, 0.18), transparent 60%),
-            radial-gradient(circle at 80% 110%, rgba(37, 99, 235, 0.14), transparent 65%);
-        opacity: 0.35;
-        pointer-events: none;
-        z-index: 0;
-    }
-
-    .card-water:hover {
-        border-color: rgba(56, 189, 248, 0.65);
-        box-shadow: 0 18px 34px rgba(15, 23, 42, 0.9);
-        transform: translateY(-2px);
-    }
-
-    .title-water {
-        font-size: 1.8rem;
-        font-weight: 800;
-        color: #e0f2fe;
-        text-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
-        letter-spacing: 0.08em;
-    }
-
-    .title-water-sub {
-        color: #bae6fd;
-        font-size: 0.9rem;
-    }
-
-    .text-muted {
-        color: #9ca3af;
+    .book-page {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 2.5rem;
     }
 
     .back-link {
         color: #38bdf8;
-        font-weight: 500;
-        font-size: 0.9rem;
+        font-size: .9rem;
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        transition: color .2s ease, transform .15s ease;
+        text-decoration: none;
+        margin-bottom: .75rem;
     }
 
     .back-link:hover {
         color: #e0f2fe;
-        transform: translateX(-2px);
     }
 
-    .cover-box {
+    .book-card {
         background: #020617;
-        border-radius: 0.9rem;
-        border: 1px solid rgba(30, 64, 175, 0.5);
-        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.9);
+        border-radius: 10px;
+        border: 1px solid #1f2937;
+        padding: 16px 16px 18px;
     }
 
-    /* RATING BINTANG */
-    .stars-wrapper span {
-        text-shadow: 0 0 4px rgba(250, 204, 21, 0.5);
+    .book-header {
+        display: flex;
+        gap: 1rem;
     }
 
-    /* BOX ULASAN */
-    .review-box {
+    .book-cover-box {
+        width: 6rem;
+        height: 9rem;
+        border-radius: 6px;
+        border: 1px solid #1f2937;
         background: #020617;
-        border-radius: 14px;
-        border: 1px solid rgba(30, 64, 175, 0.6);
-        padding: 16px 18px;
-        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.95);
-        transition: background .15s ease, border-color .15s ease;
-        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .7rem;
+        color: #6b7280;
         overflow: hidden;
     }
 
-    .review-box::before {
-        content: "";
-        position: absolute;
-        inset: -40%;
-        background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.16), transparent 60%);
-        opacity: 0.4;
-        pointer-events: none;
+    .book-cover-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
-    .review-box:hover {
-        background: #020c1b;
-        border-color: rgba(56, 189, 248, 0.7);
+    .book-info-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: .25rem;
     }
 
-    .review-username {
-        color: #e0f2fe;
-        font-weight: 600;
-        font-size: 0.95rem;
-    }
-
-    .review-meta {
-        font-size: 0.75rem;
+    .book-info-author {
+        font-size: .9rem;
         color: #9ca3af;
     }
 
-    .review-comment {
-        color: #e5e7eb;
-        font-size: 0.9rem;
+    .rating-row {
+        display: flex;
+        align-items: center;
+        gap: .25rem;
+        margin-top: .6rem;
+        font-size: .9rem;
+    }
+
+    .rating-stars span {
+        font-size: 1.1rem;
+    }
+
+    .rating-text {
+        margin-left: .25rem;
+        font-size: .9rem;
+    }
+
+    .rating-count {
+        font-size: .8rem;
+        color: #9ca3af;
+        margin-left: .4rem;
     }
 
     .section-title {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #e0f2fe;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
+        font-size: .95rem;
+        font-weight: 600;
+        margin-top: 1.5rem;
+        margin-bottom: .6rem;
     }
 
-    .section-title::after {
-        content: "";
-        display: inline-block;
-        width: 60px;
+    .section-title-line {
+        width: 50px;
         height: 2px;
         border-radius: 999px;
-        margin-left: 8px;
-        background: linear-gradient(90deg, #0ea5e9, #38bdf8);
-        vertical-align: middle;
-        opacity: 0.7;
+        background: #1f2937;
+        margin-top: 2px;
+    }
+
+    .text-muted {
+        color: #9ca3af;
+        font-size: .9rem;
+    }
+
+    .review-list {
+        margin-top: .25rem;
+        display: flex;
+        flex-direction: column;
+        gap: .75rem;
+    }
+
+    .review-item {
+        background: #020617;
+        border-radius: 8px;
+        border: 1px solid #1f2937;
+        padding: 10px 12px;
+    }
+
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: .5rem;
+        margin-bottom: .35rem;
+    }
+
+    .review-username {
+        font-size: .9rem;
+        font-weight: 600;
+    }
+
+    .review-stars span {
+        font-size: 1rem;
+    }
+
+    .review-score {
+        font-size: .8rem;
+        margin-left: .3rem;
+    }
+
+    .review-comment {
+        font-size: .9rem;
+        margin-top: .2rem;
+        white-space: pre-line;
+    }
+
+    .review-meta {
+        font-size: .75rem;
+        color: #9ca3af;
+        margin-top: .35rem;
+    }
+
+    @media (max-width: 640px) {
+        .book-page {
+            padding-inline: 1rem;
+        }
+        .book-header {
+            flex-direction: row;
+        }
+        .book-info-title {
+            font-size: 1.15rem;
+        }
     }
 </style>
 
-
-<div class="max-w-3xl mx-auto py-10">
+<div class="book-page">
 
     <a href="index.php" class="back-link">
-        <span>&larr;</span> <span>Kembali ke daftar buku</span>
+        <span>&larr;</span>
+        <span>Kembali ke daftar buku</span>
     </a>
 
-    <div class="card-water mt-5">
+    <div class="book-card">
 
         <!-- HEADER BUKU -->
-        <div class="flex gap-5 relative z-10">
-
-            <div class="h-40 w-32 overflow-hidden cover-box flex items-center justify-center">
+        <div class="book-header">
+            <div class="book-cover-box">
                 <?php if (!empty($book['cover'])): ?>
-                    <img src="uploads/cover/<?= htmlspecialchars($book['cover']) ?>" 
-                         class="h-full w-full object-cover">
+                    <img src="uploads/cover/<?= htmlspecialchars($book['cover']) ?>" alt="Cover">
                 <?php else: ?>
-                    <span class="text-gray-400 text-xs">Tidak ada cover</span>
+                    <span>Tidak ada cover</span>
                 <?php endif; ?>
             </div>
 
-            <div class="flex-1">
-                <h1 class="title-water"><?= htmlspecialchars($book['judul']) ?></h1>
-
-                <p class="title-water-sub mt-1">
-                    Oleh: <span class="font-semibold"><?= htmlspecialchars($book['penulis']) ?></span>
+            <div class="book-info">
+                <h1 class="book-info-title"><?= htmlspecialchars($book['judul']) ?></h1>
+                <p class="book-info-author">
+                    Oleh: <span><?= htmlspecialchars($book['penulis']) ?></span>
                 </p>
 
                 <!-- RATING -->
-                <div class="flex items-center gap-1 mt-3 stars-wrapper">
-                    <?php
-                    for ($i = 1; $i <= 5; $i++):
-                        if ($avgRating >= $i) {
-                            echo '<span class="text-yellow-400 text-xl">★</span>';
-                        } elseif ($avgRating >= $i - 0.5) {
-                            echo '<span class="text-yellow-300 text-xl">☆</span>';
-                        } else {
-                            echo '<span class="text-gray-700 text-xl">★</span>';
-                        }
-                    endfor;
-                    ?>
-
-                    <span class="ml-1 text-sm text-gray-200">
+                <div class="rating-row">
+                    <div class="rating-stars">
+                        <?php
+                        for ($i = 1; $i <= 5; $i++):
+                            if ($avgRating >= $i) {
+                                echo '<span class="text-yellow-400">★</span>';
+                            } elseif ($avgRating >= $i - 0.5) {
+                                echo '<span class="text-yellow-300">☆</span>';
+                            } else {
+                                echo '<span class="text-gray-700">★</span>';
+                            }
+                        endfor;
+                        ?>
+                    </div>
+                    <span class="rating-text">
                         (<?= number_format($avgRating, 1) ?>/5)
                     </span>
-
                     <?php if ($reviewCount > 0): ?>
-                        <span class="text-xs text-gray-400 ml-2">
+                        <span class="rating-count">
                             • <?= $reviewCount ?> ulasan
                         </span>
                     <?php endif; ?>
                 </div>
-
             </div>
         </div>
 
-        <!-- DAFTAR ULASAN -->
-        <h2 class="section-title mt-8 mb-4">
-            Ulasan Pembaca
-        </h2>
-
-        <?php if (empty($reviews)): ?>
-
-            <p class="text-gray-400 italic">Belum ada ulasan untuk buku ini.</p>
-
-        <?php else: ?>
-
-            <div class="space-y-4">
-
-                <?php foreach ($reviews as $r): ?>
-                    <div class="review-box">
-
-                        <div class="flex items-center justify-between mb-1 relative z-10">
-
-                            <div class="review-username">
-                                <?= htmlspecialchars($r['username']) ?>
-                            </div>
-
-                            <div class="flex items-center">
-                                <?php
-                                for ($i = 1; $i <= 5; $i++):
-                                    if ($r['rating'] >= $i) {
-                                        echo '<span class="text-yellow-400 text-lg">★</span>';
-                                    } else {
-                                        echo '<span class="text-gray-700 text-lg">★</span>';
-                                    }
-                                endfor;
-                                ?>
-                                <span class="text-sm ml-1 text-gray-200">(<?= $r['rating'] ?>/5)</span>
-                            </div>
-
-                        </div>
-
-                        <!-- KOMENTAR -->
-                        <p class="review-comment mt-2 relative z-10">
-                            <?= nl2br(htmlspecialchars($r['komentar'])) ?>
-                        </p>
-
-                        <p class="review-meta mt-1 relative z-10">
-                            Ditulis pada: <?= $r['created_at'] ?>
-                        </p>
-
-                    </div>
-                <?php endforeach; ?>
-
+        <!-- ULASAN -->
+        <div style="margin-top: 1.75rem;">
+            <div class="section-title">
+                Ulasan Pembaca
+                <div class="section-title-line"></div>
             </div>
 
-        <?php endif; ?>
+            <?php if (empty($reviews)): ?>
+
+                <p class="text-muted">Belum ada ulasan untuk buku ini.</p>
+
+            <?php else: ?>
+
+                <div class="review-list">
+                    <?php foreach ($reviews as $r): ?>
+                        <div class="review-item">
+
+                            <div class="review-header">
+                                <div class="review-username">
+                                    <?= htmlspecialchars($r['username']) ?>
+                                </div>
+                                <div style="display:flex; align-items:center;">
+                                    <div class="review-stars">
+                                        <?php
+                                        for ($i = 1; $i <= 5; $i++):
+                                            if ($r['rating'] >= $i) {
+                                                echo '<span class="text-yellow-400">★</span>';
+                                            } else {
+                                                echo '<span class="text-gray-700">★</span>';
+                                            }
+                                        endfor;
+                                        ?>
+                                    </div>
+                                    <span class="review-score">(<?= $r['rating'] ?>/5)</span>
+                                </div>
+                            </div>
+
+                            <p class="review-comment">
+                                <?= nl2br(htmlspecialchars($r['komentar'])) ?>
+                            </p>
+
+                            <p class="review-meta">
+                                Ditulis pada: <?= htmlspecialchars($r['created_at']) ?>
+                            </p>
+
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+            <?php endif; ?>
+        </div>
 
     </div>
 

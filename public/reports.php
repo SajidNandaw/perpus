@@ -18,222 +18,175 @@ $book_list   = $bookModel->reportAll($from_dt, $to_dt);
 ?>
 
 <style>
-    /* === CARD UTAMA WATER THEME (SOFT) === */
-    .shini-card {
-        background: linear-gradient(160deg, #020617, #0f172a 55%, #020617);
-        border: 1px solid rgba(56, 189, 248, 0.35);
-        border-radius: 18px;
-        padding: 24px;
-        box-shadow: 0 16px 30px rgba(15, 23, 42, 0.8);
-        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .shini-card::before {
-        content: "";
-        position: absolute;
-        inset: -40%;
-        background:
-            radial-gradient(circle at 20% 0%, rgba(56, 189, 248, 0.18), transparent 60%),
-            radial-gradient(circle at 80% 110%, rgba(37, 99, 235, 0.16), transparent 65%);
-        opacity: 0.35;
-        pointer-events: none;
-        z-index: 0;
-    }
-
-    .shini-card:hover {
-        border-color: rgba(56, 189, 248, 0.6);
-        box-shadow: 0 18px 34px rgba(15, 23, 42, 0.9);
-        transform: translateY(-2px);
-    }
-
-    /* === TITLE UTAMA === */
-    .shini-title {
-        font-size: 1.7rem;
-        font-weight: 800;
-        color: #e0f2fe;
-        text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        position: relative;
-        z-index: 10;
-    }
-
-    .shini-title::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: -6px;
-        width: 210px;
-        height: 2px;
-        border-radius: 999px;
-        background: linear-gradient(90deg, #0ea5e9, #38bdf8);
-        box-shadow: 0 0 6px rgba(56, 189, 248, 0.6);
-    }
-
-    /* === INPUT FILTER TANGGAL === */
-    .shini-input {
+    body {
         background: #020617;
-        border: 1px solid rgba(148, 163, 184, 0.7);
-        padding: 8px 10px;
-        border-radius: 0.6rem;
-        color: #e0f2fe;
-        width: 100%;
-        font-size: 0.9rem;
-        transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+        color: #e5e7eb;
     }
 
-    .shini-input::placeholder {
-        color: #64748b;
+    .report-page {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 1.75rem 1rem 2.5rem;
     }
 
-    .shini-input:focus {
-        outline: none;
-        border-color: #38bdf8;
-        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.6);
+    .report-main-card {
         background: #020617;
-    }
-
-    .filter-label {
-        color: #bae6fd;
-        font-size: 0.8rem;
-        font-weight: 600;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-    }
-
-    /* === BUTTON FILTER === */
-    .shini-btn {
-        background: linear-gradient(135deg, #0ea5e9, #2563eb);
-        padding: 8px 16px;
-        border-radius: 9999px;
-        color: #e0f2fe;
-        font-weight: 600;
-        font-size: 0.85rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
-        margin-top: 0.4rem;
-        box-shadow: 0 8px 18px rgba(30, 64, 175, 0.5);
-        border: none;
-    }
-
-    .shini-btn:hover {
-        background: linear-gradient(135deg, #38bdf8, #1d4ed8);
-        transform: translateY(-1px);
-        box-shadow: 0 10px 22px rgba(30, 64, 175, 0.6);
-    }
-
-    .shini-btn:active {
-        transform: translateY(0);
-        box-shadow: 0 6px 14px rgba(15, 23, 42, 0.9);
-    }
-
-    /* === RESET LINK === */
-    .shini-reset {
-        color: #bae6fd;
-        font-weight: 500;
-        margin-left: 6px;
-        margin-top: 0.7rem !important;
-        display: inline-block;
-        font-size: 0.85rem;
-        transition: color .2s ease;
-        position: relative;
-        z-index: 10;
-    }
-
-    .shini-reset:hover {
-        color: #e0f2fe;
-    }
-
-    /* === CARD DALAM (LAPORAN) === */
-    .report-inner-card {
-        background: #020617;
-        border-radius: 14px;
-        border: 1px solid rgba(30, 64, 175, 0.6);
-        padding: 18px;
-        box-shadow: 0 14px 26px rgba(15, 23, 42, 0.9);
-        position: relative;
-        overflow: hidden;
+        border-radius: 10px;
+        border: 1px solid #1f2937;
+        padding: 18px 18px 22px;
     }
 
     .report-title {
-        font-size: 1rem;
+        font-size: 1.3rem;
         font-weight: 700;
-        color: #e0f2fe;
-        letter-spacing: 0.1em;
+        letter-spacing: .12em;
         text-transform: uppercase;
+        margin-bottom: 1.25rem;
     }
 
-    /* === BUTTON CETAK === */
-    .shini-btn-green {
-        background: linear-gradient(135deg, #22c55e, #16a34a);
-        padding: 7px 13px;
-        border-radius: 9999px;
-        color: #ecfdf5;
+    .report-filter-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: flex-end;
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-group {
+        width: 11rem;
+    }
+
+    .filter-label {
+        display: block;
+        font-size: .78rem;
         font-weight: 600;
-        font-size: 0.8rem;
-        letter-spacing: 0.08em;
         text-transform: uppercase;
-        transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
-        box-shadow: 0 8px 18px rgba(22, 163, 74, 0.6);
+        letter-spacing: .06em;
+        margin-bottom: .25rem;
+        color: #cbd5f5;
+    }
+
+    .filter-input {
+        width: 100%;
+        padding: 7px 10px;
+        border-radius: 6px;
+        border: 1px solid #1f2937;
+        background: #020617;
+        color: #e5e7eb;
+        font-size: .85rem;
+    }
+
+    .filter-input:focus {
+        outline: none;
+        border-color: #38bdf8;
+        box-shadow: 0 0 0 1px #38bdf8;
+    }
+
+    .btn-filter {
+        padding: 7px 16px;
+        border-radius: 9999px;
         border: none;
+        background: #2563eb;
+        color: #f9fafb;
+        font-size: .8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        cursor: pointer;
     }
 
-    .shini-btn-green:hover {
-        background: linear-gradient(135deg, #4ade80, #16a34a);
-        transform: translateY(-1px);
-        box-shadow: 0 10px 22px rgba(21, 128, 61, 0.7);
+    .btn-filter:hover {
+        background: #1d4ed8;
     }
 
-    .shini-btn-green:active {
-        transform: translateY(0);
-        box-shadow: 0 6px 14px rgba(15, 23, 42, 0.9);
+    .filter-reset {
+        font-size: .8rem;
+        color: #9ca3af;
+        text-decoration: none;
+        margin-left: .5rem;
     }
 
-    /* === TABLE === */
-    table.shini-table {
+    .filter-reset:hover {
+        color: #e5e7eb;
+    }
+
+    .inner-card {
+        background: #020617;
+        border-radius: 8px;
+        border: 1px solid #1f2937;
+        padding: 14px 14px 16px;
+        margin-top: 1.25rem;
+    }
+
+    .inner-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: .75rem;
+        margin-bottom: .6rem;
+    }
+
+    .inner-title {
+        font-size: .9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+    }
+
+    .btn-print {
+        padding: 6px 12px;
+        border-radius: 9999px;
+        border: none;
+        background: #16a34a;
+        color: #ecfdf5;
+        font-size: .78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-print:hover {
+        background: #15803d;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        margin-top: .25rem;
+    }
+
+    table.report-table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 14px;
-        font-size: 0.9rem;
-        color: #dbeafe;
+        font-size: .85rem;
     }
 
-    .shini-table thead tr {
-        background: #020617;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.4);
+    .report-table thead {
+        background: #030712;
     }
 
-    .shini-table th {
-        padding: 9px 10px;
-        color: #e0f2fe;
-        font-weight: 600;
-        font-size: 0.78rem;
-        letter-spacing: 0.07em;
-        text-transform: uppercase;
+    .report-table th {
+        padding: 8px 9px;
         text-align: left;
+        font-size: .75rem;
+        font-weight: 600;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        border-bottom: 1px solid #111827;
+        white-space: nowrap;
     }
 
-    .shini-table tbody tr {
-        background: #020617;
-        border-bottom: 1px solid rgba(30, 64, 175, 0.4);
-        transition: background .15s ease;
-    }
-
-    .shini-table tbody tr:last-child {
-        border-bottom: none;
-    }
-
-    .shini-table tbody tr:hover {
-        background: #020c1b;
-    }
-
-    .shini-table td {
-        padding: 9px 10px;
-        color: #e5e7eb;
+    .report-table td {
+        padding: 8px 9px;
+        border-bottom: 1px solid #0f172a;
         vertical-align: top;
+    }
+
+    .report-table tbody tr:last-child td {
+        border-bottom: none;
     }
 
     .td-muted {
@@ -243,164 +196,167 @@ $book_list   = $bookModel->reportAll($from_dt, $to_dt);
 
     .status-pill {
         display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 3px 9px;
+        padding: 3px 10px;
         border-radius: 9999px;
-        font-size: 0.75rem;
+        font-size: .7rem;
         font-weight: 600;
-        letter-spacing: 0.06em;
         text-transform: uppercase;
+        letter-spacing: .06em;
     }
 
     .status-dipinjam {
-        background: rgba(250, 204, 21, 0.09);
+        background: #0f172a;
         color: #facc15;
-        border: 1px solid rgba(250, 204, 21, 0.7);
+        border: 1px solid #facc15;
     }
 
     .status-kembali {
-        background: rgba(34, 197, 94, 0.09);
+        background: #022c22;
         color: #4ade80;
-        border: 1px solid rgba(34, 197, 94, 0.7);
+        border: 1px solid #22c55e;
     }
 
     .empty-row {
         text-align: center;
-        padding: 1rem;
+        padding: 12px 8px;
+        font-size: .85rem;
         color: #9ca3af;
+    }
+
+    @media (max-width: 640px) {
+        .report-page {
+            padding-inline: .75rem;
+        }
+        .report-main-card {
+            padding-inline: 12px;
+        }
+        .report-title {
+            font-size: 1.1rem;
+        }
     }
 </style>
 
-<div class="max-w-6xl mx-auto shini-card">
+<div class="report-page">
+    <div class="report-main-card">
 
-    <h2 class="shini-title mb-6">Laporan Perpustakaan</h2>
+        <h2 class="report-title">Laporan Perpustakaan</h2>
 
-    <!-- FILTER TANGGAL -->
-    <form method="get" class="mb-6 flex flex-wrap items-end gap-5 relative z-10">
+        <!-- FILTER TANGGAL -->
+        <form method="get" class="report-filter-form">
+            <div class="filter-group">
+                <label class="filter-label">Dari Tanggal</label>
+                <input type="date" name="from" value="<?= htmlspecialchars($from) ?>" class="filter-input">
+            </div>
 
-        <div class="w-44">
-            <label class="filter-label">Dari Tanggal</label>
-            <input type="date" name="from" value="<?= htmlspecialchars($from) ?>" class="shini-input mt-1">
+            <div class="filter-group">
+                <label class="filter-label">Sampai Tanggal</label>
+                <input type="date" name="to" value="<?= htmlspecialchars($to) ?>" class="filter-input">
+            </div>
+
+            <div>
+                <button class="btn-filter" type="submit">Filter</button>
+                <a href="reports.php" class="filter-reset">Reset</a>
+            </div>
+        </form>
+
+        <!-- LAPORAN PEMINJAMAN -->
+        <div class="inner-card">
+            <div class="inner-header">
+                <h3 class="inner-title">Laporan Peminjaman</h3>
+                <a href="reports_print.php?type=peminjaman&from=<?= $from ?>&to=<?= $to ?>" 
+                   class="btn-print" target="_blank">
+                    Cetak
+                </a>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Buku</th>
+                            <th>Tanggal Pinjam</th>
+                            <th>Tanggal Kembali</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($borrow_list)): ?>
+                            <tr>
+                                <td colspan="6" class="empty-row">Tidak ada data</td>
+                            </tr>
+                        <?php endif; ?>
+
+                        <?php foreach($borrow_list as $r): ?>
+                            <tr>
+                                <td><?= $r['id'] ?></td>
+                                <td><?= htmlspecialchars($r['username']) ?></td>
+                                <td><?= htmlspecialchars($r['judul']) ?></td>
+                                <td><?= $r['tanggal_pinjam'] ?></td>
+                                <td class="<?= $r['tanggal_kembali'] ? '' : 'td-muted' ?>">
+                                    <?= $r['tanggal_kembali'] ?: '-' ?>
+                                </td>
+                                <td>
+                                    <?php if ($r['status'] === 'dipinjam'): ?>
+                                        <span class="status-pill status-dipinjam">Dipinjam</span>
+                                    <?php else: ?>
+                                        <span class="status-pill status-kembali">Kembali</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <div class="w-44">
-            <label class="filter-label">Sampai Tanggal</label>
-            <input type="date" name="to" value="<?= htmlspecialchars($to) ?>" class="shini-input mt-1">
+        <!-- LAPORAN DETAIL BUKU -->
+        <div class="inner-card">
+            <div class="inner-header">
+                <h3 class="inner-title">Laporan Detail Buku</h3>
+                <a href="reports_print.php?type=buku&from=<?= $from ?>&to=<?= $to ?>" 
+                   class="btn-print" target="_blank">
+                    Cetak
+                </a>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Judul</th>
+                            <th>Penulis</th>
+                            <th>Penerbit</th>
+                            <th>Tahun Terbit</th>
+                            <th>Stok</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($book_list)): ?>
+                            <tr>
+                                <td colspan="6" class="empty-row">Tidak ada data</td>
+                            </tr>
+                        <?php endif; ?>
+
+                        <?php foreach($book_list as $b): ?>
+                            <tr>
+                                <td><?= $b['id'] ?></td>
+                                <td><?= htmlspecialchars($b['judul']) ?></td>
+                                <td><?= htmlspecialchars($b['penulis']) ?></td>
+                                <td><?= htmlspecialchars($b['penerbit']) ?></td>
+                                <td><?= $b['tahun_terbit'] ?></td>
+                                <td><?= $b['stok'] ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
         </div>
-
-        <button class="shini-btn mt-6">Filter</button>
-
-        <a href="reports.php" class="shini-reset">Reset</a>
-    </form>
-
-
-
-    <!-- ============================= -->
-    <!--       LAPORAN PEMINJAMAN      -->
-    <!-- ============================= -->
-    <div class="mt-8 report-inner-card">
-
-        <div class="flex justify-between items-center mb-3">
-            <h3 class="report-title">LAPORAN PEMINJAMAN</h3>
-
-            <a href="reports_print.php?type=peminjaman&from=<?= $from ?>&to=<?= $to ?>"
-               class="shini-btn-green" target="_blank">
-               Cetak
-            </a>
-        </div>
-
-        <table class="shini-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>User</th>
-                    <th>Buku</th>
-                    <th>Tanggal Pinjam</th>
-                    <th>Tanggal Kembali</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                <?php if (empty($borrow_list)): ?>
-                    <tr>
-                        <td colspan="6" class="empty-row">Tidak ada data</td>
-                    </tr>
-                <?php endif; ?>
-
-                <?php foreach($borrow_list as $r): ?>
-                    <tr>
-                        <td><?= $r['id'] ?></td>
-                        <td><?= htmlspecialchars($r['username']) ?></td>
-                        <td><?= htmlspecialchars($r['judul']) ?></td>
-                        <td><?= $r['tanggal_pinjam'] ?></td>
-                        <td class="<?= $r['tanggal_kembali'] ? '' : 'td-muted' ?>">
-                            <?= $r['tanggal_kembali'] ?: '-' ?>
-                        </td>
-                        <td>
-                            <?php if ($r['status'] === 'dipinjam'): ?>
-                                <span class="status-pill status-dipinjam">Dipinjam</span>
-                            <?php else: ?>
-                                <span class="status-pill status-kembali">Kembali</span>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-
-
-
-    <!-- ============================= -->
-    <!--       LAPORAN DETAIL BUKU     -->
-    <!-- ============================= -->
-    <div class="mt-10 report-inner-card">
-
-        <div class="flex justify-between items-center mb-3">
-            <h3 class="report-title">LAPORAN DETAIL BUKU</h3>
-
-            <a href="reports_print.php?type=buku&from=<?= $from ?>&to=<?= $to ?>"
-               class="shini-btn-green" target="_blank">
-               Cetak
-            </a>
-        </div>
-
-        <table class="shini-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Judul</th>
-                    <th>Penulis</th>
-                    <th>Penerbit</th>
-                    <th>Tahun Terbit</th>
-                    <th>Stok</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                <?php if (empty($book_list)): ?>
-                    <tr>
-                        <td colspan="6" class="empty-row">Tidak ada data</td>
-                    </tr>
-                <?php endif; ?>
-
-                <?php foreach($book_list as $b): ?>
-                    <tr>
-                        <td><?= $b['id'] ?></td>
-                        <td><?= htmlspecialchars($b['judul']) ?></td>
-                        <td><?= htmlspecialchars($b['penulis']) ?></td>
-                        <td><?= htmlspecialchars($b['penerbit']) ?></td>
-                        <td><?= $b['tahun_terbit'] ?></td>
-                        <td><?= $b['stok'] ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
 
     </div>
-
 </div>
 
 <?php require_once __DIR__.'/../templates/footer.php'; ?>

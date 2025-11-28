@@ -61,7 +61,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pinjam']) && $role ==
         $message_type = "success";
     }
 
-    // UI TETAP DI BUKU YANG BARUSAN DIPILIH (baik berhasil maupun gagal)
     $selectedBookId = $buku_id;
 }
 
@@ -71,11 +70,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pinjam']) && $role ==
 if (isset($_GET['kembali']) && $role === 'peminjam') {
     $id = intval($_GET['kembali']);
 
-    // pastikan peminjaman milik user yang login
     $peminjamanRow = $pm->find($id);
 
     if ($peminjamanRow && $peminjamanRow['user_id'] == $user_id_session) {
-        // simpan buku_id dulu untuk UI
         $buku_id = $peminjamanRow['buku_id'];
 
         $berhasil = $pm->returnBook($id, date('Y-m-d'));
@@ -83,12 +80,10 @@ if (isset($_GET['kembali']) && $role === 'peminjam') {
             $message      = "Buku berhasil dikembalikan.";
             $message_type = "success";
         } else {
-            // misal sudah dikembalikan sebelumnya
             $message      = "Peminjaman sudah pernah dikembalikan atau tidak ditemukan.";
             $message_type = "error";
         }
 
-        // setelah mengembalikan, dropdown diarahkan ke buku yang baru dikembalikan
         $selectedBookId = $buku_id;
     } else {
         $message      = "Anda tidak berhak mengembalikan peminjaman ini.";
@@ -122,7 +117,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['review']) && $role ==
         $message_type = "success";
     }
 
-    // UI diarahkan ke buku yang sedang di-review
     $selectedBookId = $buku_id;
 }
 
@@ -144,7 +138,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_review']) && $ro
         $message      = "Ulasan berhasil diperbarui.";
         $message_type = "success";
 
-        // arahkan dropdown ke buku dari ulasan ini
         $selectedBookId = $reviewRow['buku_id'];
     }
 }
@@ -164,7 +157,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_review']) && $
         $message      = "Ulasan berhasil dihapus.";
         $message_type = "success";
 
-        // biar tetap nempel ke buku itu juga
         $selectedBookId = $reviewRow['buku_id'];
     }
 }
@@ -174,7 +166,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_review']) && $
 // ============================
 $books = $bm->all();
 
-// Peminjam hanya boleh melihat peminjamannya sendiri
 $stmt = $db->pdo()->prepare("
     SELECT p.*, u.username, b.judul, b.cover
     FROM peminjaman p
@@ -188,225 +179,355 @@ $peminjaman = $stmt->fetchAll();
 ?>
 
 <style>
-    /* Background keseluruhan */
-    .water-bg {
-        background: radial-gradient(circle at top, #0b1120 0, #020617 55%, #000 100%);
-    }
-
-    /* Kartu utama */
-    .water-card {
-        background: linear-gradient(160deg, #020617, #0b1120 55%, #020617);
-        border-radius: 18px;
-        border: 1px solid rgba(56, 189, 248, 0.35);
-        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.9);
-        transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .water-card::before {
-        content: "";
-        position: absolute;
-        inset: -40%;
-        background:
-            radial-gradient(circle at 10% 0%, rgba(56, 189, 248, 0.18), transparent 60%),
-            radial-gradient(circle at 90% 100%, rgba(37, 99, 235, 0.18), transparent 65%);
-        opacity: 0.35;
-        pointer-events: none;
-        z-index: 0;
-    }
-
-    .water-card:hover {
-        transform: translateY(-2px);
-        border-color: rgba(56, 189, 248, 0.6);
-        box-shadow: 0 20px 38px rgba(15, 23, 42, 0.95);
-    }
-
-    .water-title {
-        text-shadow: 0 0 12px rgba(56, 189, 248, 0.7);
-        letter-spacing: 0.12em;
-        color: #e0f2fe;
-    }
-
-    .water-subtitle {
-        color: #bae6fd;
-        letter-spacing: 0.06em;
-        font-size: 0.95rem;
-    }
-
-    /* Alert */
-    .water-alert-success {
-        background: rgba(22, 163, 74, 0.12);
-        border: 1px solid rgba(34, 197, 94, 0.55);
-        color: #bbf7d0;
-        border-radius: 12px;
-    }
-
-    .water-alert-error {
-        background: rgba(185, 28, 28, 0.14);
-        border: 1px solid rgba(248, 113, 113, 0.7);
-        color: #fecaca;
-        border-radius: 12px;
-    }
-
-    /* Input & Select */
-    .water-input {
-        background: rgba(15, 23, 42, 0.95);
-        border: 1px solid rgba(30, 64, 175, 0.7);
-        color: #e5e7eb;
-        border-radius: 0.75rem;
-        transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
-    }
-
-    .water-input:focus {
-        outline: none;
-        border-color: rgba(56, 189, 248, 0.9);
-        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.7);
+    body {
         background: #020617;
     }
 
-    .water-label {
-        color: #cbd5f5;
-        font-size: 0.85rem;
-        font-weight: 600;
+    .borrow-page {
+        min-height: 100vh;
+        padding: 1.5rem 1.5rem 2rem;
+        color: #e5e7eb;
     }
 
-    /* Button utama */
-    .water-btn {
-        background: linear-gradient(135deg, #0ea5e9, #38bdf8);
-        color: #0b1120;
+    .borrow-title {
+        font-size: 1.4rem;
         font-weight: 700;
-        border-radius: 9999px;
-        box-shadow: 0 10px 22px rgba(8, 47, 73, 0.9);
-        transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+        text-align: center;
+        margin-bottom: .3rem;
+        text-transform: uppercase;
+        letter-spacing: .08em;
     }
 
-    .water-btn:hover {
-        transform: translateY(-1px);
-        filter: brightness(1.05);
-        box-shadow: 0 14px 28px rgba(8, 47, 73, 1);
-    }
-
-    /* Tombol kecil sekunder */
-    .water-btn-secondary {
-        background: rgba(15, 23, 42, 0.9);
-        border-radius: 9999px;
-        border: 1px solid rgba(148, 163, 184, 0.6);
-        color: #e5e7eb;
-        transition: background .15s ease, border-color .15s ease, transform .12s ease;
-    }
-
-    .water-btn-secondary:hover {
-        background: rgba(15, 23, 42, 1);
-        border-color: rgba(226, 232, 240, 0.85);
-        transform: translateY(-1px);
-    }
-
-    /* Tabel */
-    table.water-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.9rem;
-        color: #e5e7eb;
-    }
-
-    .water-table thead {
-        background: rgba(15, 23, 42, 0.98);
-    }
-
-    .water-table th {
-        padding: 0.75rem;
-        font-weight: 600;
-        color: #bfdbfe;
-        border-bottom: 1px solid rgba(30, 64, 175, 0.7);
-        text-align: left;
-        white-space: nowrap;
-    }
-
-    .water-table tbody tr {
-        background: rgba(15, 23, 42, 0.9);
-        transition: background .15s ease;
-    }
-
-    .water-table tbody tr:nth-child(even) {
-        background: rgba(15, 23, 42, 0.96);
-    }
-
-    .water-table tbody tr:hover {
-        background: #020617;
-    }
-
-    .water-table td {
-        padding: 0.65rem 0.75rem;
-        border-bottom: 1px solid rgba(15, 23, 42, 0.9);
-        vertical-align: top;
-    }
-
-    /* Cover di form pinjam */
-    .water-cover-box {
-        background: #020617;
-        border-radius: 0.9rem;
-        border: 1px solid rgba(30, 64, 175, 0.7);
-        box-shadow: 0 10px 24px rgba(15, 23, 42, 1);
-    }
-
-    /* Panel ulasan kecil */
-    .water-review-panel {
-        background: rgba(15, 23, 42, 0.95);
-        border-radius: 0.9rem;
-        border: 1px solid rgba(30, 64, 175, 0.75);
-    }
-
-    .water-small-btn {
-        font-size: 0.78rem;
-    }
-
-    .water-text-muted {
+    .borrow-subtitle {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        font-size: .9rem;
         color: #9ca3af;
     }
 
-    .water-text-link {
-        color: #38bdf8;
+    .borrow-card {
+        background: #020617;
+        border-radius: 10px;
+        border: 1px solid #1f2937;
+        padding: 14px 14px 16px;
+        margin-bottom: 1rem;
     }
 
-    .water-text-link:hover {
-        color: #e0f2fe;
+    .borrow-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: .75rem;
+    }
+
+    .borrow-card-title {
+        font-size: .85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        color: #9ca3af;
+    }
+
+    .alert-success-borrow,
+    .alert-error-borrow {
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: .85rem;
+        margin-bottom: 1rem;
+    }
+
+    .alert-success-borrow {
+        background: #022c22;
+        border: 1px solid #16a34a;
+        color: #bbf7d0;
+    }
+
+    .alert-error-borrow {
+        background: #450a0a;
+        border: 1px solid #ef4444;
+        color: #fecaca;
+    }
+
+    .borrow-label {
+        font-size: .8rem;
+        font-weight: 600;
+        margin-bottom: 3px;
+        display: block;
+    }
+
+    .borrow-input,
+    .borrow-select {
+        width: 100%;
+        padding: 7px 10px;
+        border-radius: 6px;
+        border: 1px solid #1f2937;
+        background: #020617;
+        color: #e5e7eb;
+        font-size: .85rem;
+    }
+
+    .borrow-input:focus,
+    .borrow-select:focus {
+        outline: none;
+        border-color: #38bdf8;
+    }
+
+    .borrow-preview-box {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        margin-top: .75rem;
+    }
+
+    .borrow-preview-cover {
+        height: 4.2rem;
+        width: 3rem;
+        border-radius: 6px;
+        border: 1px solid #1f2937;
+        background: #020617;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .7rem;
+        color: #6b7280;
+        overflow: hidden;
+    }
+
+    .borrow-preview-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .borrow-preview-text-title {
+        font-size: .9rem;
+        font-weight: 600;
+    }
+
+    .borrow-preview-text-author {
+        font-size: .8rem;
+        color: #9ca3af;
+    }
+
+    .borrow-btn-main {
+        padding: 7px 16px;
+        border-radius: 9999px;
+        background: #2563eb;
+        color: #f9fafb;
+        font-size: .8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        border: none;
+        margin-top: .75rem;
+        cursor: pointer;
+    }
+
+    .borrow-btn-main:hover {
+        background: #1d4ed8;
+    }
+
+    .borrow-btn-secondary {
+        padding: 5px 10px;
+        border-radius: 9999px;
+        background: transparent;
+        border: 1px solid #4b5563;
+        color: #e5e7eb;
+        font-size: .75rem;
+        cursor: pointer;
+    }
+
+    .borrow-btn-secondary:hover {
+        border-color: #9ca3af;
+    }
+
+    .borrow-small-link {
+        font-size: .75rem;
+        color: #38bdf8;
+        cursor: pointer;
+    }
+
+    .borrow-small-link:hover {
+        color: #e5e7eb;
+    }
+
+    .borrow-table-container {
+        border-radius: 8px;
+        border: 1px solid #111827;
+        background: #020617;
+        overflow-x: auto;
+    }
+
+    table.borrow-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: .85rem;
+    }
+
+    .borrow-table thead {
+        background: #030712;
+    }
+
+    .borrow-table th {
+        padding: 8px 10px;
+        font-size: .75rem;
+        font-weight: 600;
+        color: #9ca3af;
+        text-align: left;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        border-bottom: 1px solid #111827;
+        white-space: nowrap;
+    }
+
+    .borrow-table td {
+        padding: 8px 10px;
+        border-bottom: 1px solid #0f172a;
+        vertical-align: top;
+    }
+
+    .borrow-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .borrow-cover-cell {
+        width: 3.2rem;
+    }
+
+    .borrow-cover-mini {
+        height: 4rem;
+        width: 3rem;
+        border-radius: 6px;
+        border: 1px solid #1f2937;
+        overflow: hidden;
+        background: #020617;
+    }
+
+    .borrow-cover-mini img {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+    }
+
+    .borrow-cover-mini-empty {
+        height: 4rem;
+        width: 3rem;
+        border-radius: 6px;
+        border: 1px dashed #4b5563;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .65rem;
+        color: #6b7280;
+        background: #020617;
+        text-align: center;
+        padding: 2px;
+    }
+
+    .borrow-status-badge {
+        display: inline-flex;
+        padding: 3px 8px;
+        border-radius: 9999px;
+        font-size: .7rem;
+        font-weight: 600;
+    }
+
+    .borrow-status-pinjam {
+        background: #0f172a;
+        color: #93c5fd;
+        border: 1px solid #1d4ed8;
+    }
+
+    .borrow-status-kembali {
+        background: #022c22;
+        color: #bbf7d0;
+        border: 1px solid #16a34a;
+    }
+
+    .borrow-text-muted {
+        font-size: .78rem;
+        color: #9ca3af;
+    }
+
+    .borrow-rating-text {
+        font-size: .78rem;
+        color: #fbbf24;
+    }
+
+    .borrow-review-panel {
+        border-radius: 6px;
+        border: 1px solid #1f2937;
+        background: #020617;
+        padding: 8px;
+        margin-top: 6px;
+    }
+
+    .borrow-review-textarea {
+        width: 100%;
+        padding: 6px 8px;
+        border-radius: 6px;
+        border: 1px solid #1f2937;
+        background: #020617;
+        color: #e5e7eb;
+        font-size: .78rem;
+        resize: vertical;
+    }
+
+    .borrow-review-textarea:focus {
+        outline: none;
+        border-color: #38bdf8;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    @media (min-width: 768px) {
+        .borrow-form-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .borrow-page {
+            padding: 1.25rem 1rem 1.75rem;
+        }
+        .borrow-title {
+            font-size: 1.2rem;
+        }
     }
 </style>
 
-<div class="p-6 water-bg text-white min-h-screen">
+<div class="borrow-page">
 
-    <h2 class="text-3xl font-extrabold mb-2 text-center water-title uppercase">
-        PEMINJAMAN SAYA
-    </h2>
-    <p class="text-center mb-8 water-subtitle">
-        Lihat daftar buku yang sedang dan sudah kamu pinjam.
-    </p>
+    <h2 class="borrow-title">Peminjaman Saya</h2>
+    <p class="borrow-subtitle">Lihat dan kelola buku yang sedang atau sudah kamu pinjam.</p>
 
     <?php if ($message): ?>
-        <div class="mb-6 px-4 py-3 <?= $message_type=='error' ? 'water-alert-error' : 'water-alert-success' ?>">
+        <div class="<?= $message_type==='error' ? 'alert-error-borrow' : 'alert-success-borrow' ?>">
             <?= htmlspecialchars($message) ?>
         </div>
     <?php endif; ?>
 
     <?php if ($role === 'peminjam'): ?>
-    <!-- FORM PINJAM BUKU -->
-    <div class="water-card p-5 mb-10">
-        <div class="relative z-10">
-            <div class="flex items-center justify-between mb-3">
-                <h3 class="text-base font-semibold tracking-[0.18em] text-sky-200 uppercase">
-                    Form Peminjaman
-                </h3>
-            </div>
+    <!-- FORM PINJAM -->
+    <div class="borrow-card">
+        <div class="borrow-card-header">
+            <div class="borrow-card-title">Form Peminjaman</div>
+        </div>
 
-            <form method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                <input type="hidden" name="pinjam" value="1">
+        <form method="post">
+            <input type="hidden" name="pinjam" value="1">
 
+            <div class="borrow-form-grid">
                 <div>
-                    <label class="block water-label mb-1">Buku</label>
-                    <select id="selectBuku" name="buku_id" class="w-full px-3 py-2 water-input">
+                    <label class="borrow-label">Pilih Buku</label>
+                    <select id="selectBuku" name="buku_id" class="borrow-select">
                         <?php foreach ($books as $b): ?>
-                            <option 
+                            <option
                                 value="<?= $b['id'] ?>"
                                 data-cover="<?= htmlspecialchars($b['cover'] ?? '') ?>"
                                 data-judul="<?= htmlspecialchars($b['judul']) ?>"
@@ -420,232 +541,207 @@ $peminjaman = $stmt->fetchAll();
                 </div>
 
                 <div>
-                    <label class="block water-label mb-1">Tanggal Pinjam</label>
-                    <input type="date" name="tanggal_pinjam" value="<?= date('Y-m-d') ?>" class="w-full px-3 py-2 water-input">
+                    <label class="borrow-label">Tanggal Pinjam</label>
+                    <input type="date" name="tanggal_pinjam" value="<?= date('Y-m-d') ?>" class="borrow-input">
                 </div>
+            </div>
 
-                <div class="md:col-span-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mt-2">
-
-                    <div class="flex items-center gap-3">
-                        <div class="h-20 w-16 overflow-hidden water-cover-box flex items-center justify-center">
-                            <img id="previewCover" src="" class="h-full w-full object-cover hidden">
-                            <div id="previewNo" class="text-[0.65rem] water-text-muted text-center px-1">
-                                Tidak ada cover
-                            </div>
-                        </div>
-                        <div class="space-y-1">
-                            <div id="previewJudul" class="font-semibold text-sky-100 text-sm"></div>
-                            <div id="previewPenulis" class="text-xs water-text-muted"></div>
-                        </div>
+            <div>
+                <div class="borrow-preview-box">
+                    <div class="borrow-preview-cover">
+                        <img id="previewCover" src="" style="display:none;">
+                        <span id="previewNo">Tidak ada cover</span>
                     </div>
-
-                    <button class="water-btn px-6 py-2 text-sm uppercase tracking-[0.18em]">
-                        Pinjam Buku
-                    </button>
+                    <div>
+                        <div id="previewJudul" class="borrow-preview-text-title"></div>
+                        <div id="previewPenulis" class="borrow-preview-text-author"></div>
+                    </div>
                 </div>
 
-            </form>
-        </div>
+                <button class="borrow-btn-main" type="submit">
+                    Pinjam Buku
+                </button>
+            </div>
+        </form>
     </div>
     <?php endif; ?>
 
-    <!-- RIWAYAT PEMINJAMAN -->
-    <div class="water-card p-5">
-        <div class="relative z-10">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-semibold tracking-[0.22em] text-sky-200 uppercase">
-                    Riwayat Peminjaman
-                </h3>
-            </div>
+    <!-- RIWAYAT -->
+    <div class="borrow-card">
+        <div class="borrow-card-header">
+            <div class="borrow-card-title">Riwayat Peminjaman</div>
+        </div>
 
-            <div class="overflow-x-auto rounded-xl border border-slate-800/70 bg-slate-950/40">
-                <table class="water-table">
-                    <thead>
-                        <tr>
-                            <th>Cover</th>
-                            <th>Buku</th>
-                            <th>Tanggal Pinjam</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                            <th>Ulasan</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <?php foreach ($peminjaman as $p):
-                            $bookRow = $bm->find($p['buku_id']);
-                            $cover   = $bookRow['cover'] ?? null;
-                            $review  = $rm->findByPeminjaman($p['id']);
-                        ?>
-                        <tr>
-                            <!-- Cover -->
-                            <td class="p-2">
-                                <?php if ($cover): ?>
-                                    <div class="h-16 w-12 overflow-hidden rounded-md border border-slate-700 bg-slate-900 shadow">
-                                        <img src="uploads/cover/<?= htmlspecialchars($cover) ?>" class="h-full w-full object-cover">
-                                    </div>
-                                <?php else: ?>
-                                    <div class="h-16 w-12 bg-slate-900 rounded-md border border-slate-700 text-[0.65rem] water-text-muted flex items-center justify-center text-center px-1">
-                                        No Cover
-                                    </div>
-                                <?php endif; ?>
-                            </td>
-
-                            <!-- Judul -->
-                            <td class="p-2 align-top">
-                                <div class="font-semibold text-sky-100 text-sm">
-                                    <?= htmlspecialchars($p['judul']) ?>
+        <div class="borrow-table-container">
+            <table class="borrow-table">
+                <thead>
+                    <tr>
+                        <th>Cover</th>
+                        <th>Buku</th>
+                        <th>Tanggal Pinjam</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                        <th>Ulasan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($peminjaman as $p):
+                    $bookRow = $bm->find($p['buku_id']);
+                    $cover   = $bookRow['cover'] ?? null;
+                    $review  = $rm->findByPeminjaman($p['id']);
+                ?>
+                    <tr>
+                        <td class="borrow-cover-cell">
+                            <?php if ($cover): ?>
+                                <div class="borrow-cover-mini">
+                                    <img src="uploads/cover/<?= htmlspecialchars($cover) ?>" alt="">
                                 </div>
-                            </td>
-
-                            <!-- Tanggal pinjam -->
-                            <td class="p-2 align-top water-text-muted text-xs">
+                            <?php else: ?>
+                                <div class="borrow-cover-mini-empty">No Cover</div>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <div style="font-size:.9rem; font-weight:600;">
+                                <?= htmlspecialchars($p['judul']) ?>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="borrow-text-muted">
                                 <?= htmlspecialchars($p['tanggal_pinjam']) ?>
-                            </td>
+                            </div>
+                        </td>
+                        <td>
+                            <?php if ($p['status'] == 'dipinjam'): ?>
+                                <span class="borrow-status-badge borrow-status-pinjam">Sedang dipinjam</span>
+                            <?php else: ?>
+                                <span class="borrow-status-badge borrow-status-kembali">Dikembalikan</span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <?php if ($p['status'] == 'dipinjam'): ?>
+                                <a href="borrow.php?kembali=<?= $p['id'] ?>" class="borrow-small-link">
+                                    Kembalikan
+                                </a>
+                            <?php else: ?>
+                                <span class="borrow-text-muted">Selesai</span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <?php if ($p['status'] == 'dikembalikan' && !$review): ?>
 
-                            <!-- Status -->
-                            <td class="p-2 align-top text-xs">
-                                <?php if ($p['status'] == 'dipinjam'): ?>
-                                    <span class="px-2 py-1 rounded-full bg-sky-900/40 text-sky-200 border border-sky-700/60">
-                                        Sedang dipinjam
-                                    </span>
-                                <?php else: ?>
-                                    <span class="px-2 py-1 rounded-full bg-emerald-900/40 text-emerald-200 border border-emerald-700/60">
-                                        Dikembalikan
-                                    </span>
-                                <?php endif; ?>
-                            </td>
+                                <span class="borrow-small-link"
+                                      onclick="document.getElementById('add<?= $p['id'] ?>').classList.toggle('hidden')">
+                                    Beri Ulasan
+                                </span>
 
-                            <!-- Aksi -->
-                            <td class="p-2 align-top text-xs">
-                                <?php if ($p['status'] == 'dipinjam'): ?>
-                                    <a href="borrow.php?kembali=<?= $p['id'] ?>" class="water-text-link underline">
-                                        Kembalikan
-                                    </a>
-                                <?php else: ?>
-                                    <span class="text-emerald-300 text-xs font-semibold">✔ Selesai</span>
-                                <?php endif; ?>
-                            </td>
+                                <div id="add<?= $p['id'] ?>" class="hidden">
+                                    <form method="post" class="borrow-review-panel">
+                                        <input type="hidden" name="review" value="1">
+                                        <input type="hidden" name="peminjaman_id" value="<?= $p['id'] ?>">
+                                        <input type="hidden" name="buku_id" value="<?= $p['buku_id'] ?>">
 
-                            <!-- Ulasan -->
-                            <td class="p-2 align-top text-xs">
-                                <?php if ($p['status'] == 'dikembalikan' && !$review): ?>
+                                        <div style="margin-bottom:6px;">
+                                            <label class="borrow-label">Rating</label>
+                                            <select name="rating" class="borrow-select" style="font-size:.78rem; padding:4px 6px;">
+                                                <?php for($i=1;$i<=5;$i++): ?>
+                                                    <option value="<?= $i ?>">⭐ <?= $i ?></option>
+                                                <?php endfor; ?>
+                                            </select>
+                                        </div>
 
-                                    <button
-                                        onclick="document.getElementById('add<?= $p['id'] ?>').classList.toggle('hidden')" 
-                                        class="water-text-link underline water-small-btn">
-                                        Beri Ulasan
-                                    </button>
+                                        <div style="margin-bottom:6px;">
+                                            <textarea name="komentar" rows="3"
+                                                      class="borrow-review-textarea"
+                                                      placeholder="Tulis ulasan..."></textarea>
+                                        </div>
 
-                                    <div id="add<?= $p['id'] ?>" class="hidden mt-2">
-                                        <form method="post" class="water-review-panel p-3 space-y-2">
-                                            <input type="hidden" name="review" value="1">
-                                            <input type="hidden" name="peminjaman_id" value="<?= $p['id'] ?>">
-                                            <input type="hidden" name="buku_id" value="<?= $p['buku_id'] ?>">
-
-                                            <div>
-                                                <label class="water-label">Rating</label>
-                                                <select name="rating" class="w-full mt-1 px-2 py-1 water-input text-xs">
-                                                    <?php for ($i = 1; $i <= 5; $i++): ?>
-                                                        <option value="<?= $i ?>">⭐ <?= $i ?></option>
-                                                    <?php endfor; ?>
-                                                </select>
-                                            </div>
-
-                                            <div>
-                                                <textarea name="komentar" class="w-full mt-1 px-2 py-2 water-input text-xs" rows="3" placeholder="Tulis ulasan..."></textarea>
-                                            </div>
-
-                                            <div class="mt-1 flex items-center gap-2">
-                                                <button class="water-btn water-small-btn px-3 py-1 uppercase tracking-[0.18em]">
-                                                    Kirim
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onclick="document.getElementById('add<?= $p['id'] ?>').classList.add('hidden')"
-                                                    class="water-btn-secondary water-small-btn px-3 py-1">
-                                                    Batal
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-
-                                <?php elseif ($review): ?>
-
-                                    <div class="text-xs mb-1 text-amber-300">
-                                        ⭐ <?= $review['rating'] ?>/5
-                                    </div>
-                                    <div class="text-[0.7rem] water-text-muted mb-2">
-                                        <?= nl2br(htmlspecialchars($review['komentar'])) ?>
-                                    </div>
-
-                                    <div class="flex items-center gap-2">
-                                        <button
-                                            onclick="document.getElementById('edit<?= $review['id'] ?>').classList.toggle('hidden')"
-                                            class="water-text-link underline water-small-btn">
-                                            Edit
-                                        </button>
-
-                                        <form method="post" class="inline" onsubmit="return confirm('Hapus ulasan ini?')">
-                                            <input type="hidden" name="delete_review" value="1">
-                                            <input type="hidden" name="review_id" value="<?= $review['id'] ?>">
-                                            <button class="text-rose-300 hover:text-rose-100 underline water-small-btn">
-                                                Hapus
+                                        <div style="display:flex; gap:.5rem; margin-top:4px;">
+                                            <button type="submit" class="borrow-btn-main" style="font-size:.72rem; padding:5px 12px;">
+                                                Kirim
                                             </button>
-                                        </form>
-                                    </div>
+                                            <button type="button"
+                                                    class="borrow-btn-secondary"
+                                                    onclick="document.getElementById('add<?= $p['id'] ?>').classList.add('hidden')">
+                                                Batal
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
 
-                                    <div id="edit<?= $review['id'] ?>" class="hidden mt-2">
-                                        <form method="post" class="water-review-panel p-3 space-y-2">
-                                            <input type="hidden" name="edit_review" value="1">
-                                            <input type="hidden" name="review_id" value="<?= $review['id'] ?>">
+                            <?php elseif ($review): ?>
 
-                                            <div>
-                                                <label class="water-label">Rating</label>
-                                                <select name="rating" class="w-full mt-1 px-2 py-1 water-input text-xs">
-                                                    <?php for ($i = 1; $i <= 5; $i++): ?>
-                                                        <option value="<?= $i ?>" <?= $i == $review['rating'] ? 'selected' : '' ?>>⭐ <?= $i ?></option>
-                                                    <?php endfor; ?>
-                                                </select>
-                                            </div>
+                                <div class="borrow-rating-text">
+                                    ⭐ <?= $review['rating'] ?>/5
+                                </div>
+                                <div class="borrow-text-muted" style="font-size:.75rem; margin:.15rem 0 .4rem;">
+                                    <?= nl2br(htmlspecialchars($review['komentar'])) ?>
+                                </div>
 
-                                            <div>
-                                                <textarea name="komentar" class="w-full mt-1 px-2 py-2 water-input text-xs" rows="3"><?= htmlspecialchars($review['komentar']) ?></textarea>
-                                            </div>
+                                <div style="display:flex; gap:.5rem; align-items:center;">
+                                    <span class="borrow-small-link"
+                                          onclick="document.getElementById('edit<?= $review['id'] ?>').classList.toggle('hidden')">
+                                        Edit
+                                    </span>
 
-                                            <div class="mt-1 flex items-center gap-2">
-                                                <button class="water-btn water-small-btn px-3 py-1 uppercase tracking-[0.18em]">
-                                                    Simpan
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onclick="document.getElementById('edit<?= $review['id'] ?>').classList.add('hidden')"
-                                                    class="water-btn-secondary water-small-btn px-3 py-1">
-                                                    Batal
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
+                                    <form method="post" style="display:inline;"
+                                          onsubmit="return confirm('Hapus ulasan ini?')">
+                                        <input type="hidden" name="delete_review" value="1">
+                                        <input type="hidden" name="review_id" value="<?= $review['id'] ?>">
+                                        <button type="submit" class="borrow-small-link" style="color:#fb7185;">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                </div>
 
-                                <?php else: ?>
-                                    <span class="water-text-muted">-</span>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
+                                <div id="edit<?= $review['id'] ?>" class="hidden">
+                                    <form method="post" class="borrow-review-panel">
+                                        <input type="hidden" name="edit_review" value="1">
+                                        <input type="hidden" name="review_id" value="<?= $review['id'] ?>">
 
-                        <?php if (empty($peminjaman)): ?>
-                            <tr>
-                                <td colspan="6" class="py-4 text-center text-sm water-text-muted">
-                                    Belum ada peminjaman yang tercatat.
-                                </td>
-                            </tr>
-                        <?php endif; ?>
+                                        <div style="margin-bottom:6px;">
+                                            <label class="borrow-label">Rating</label>
+                                            <select name="rating" class="borrow-select" style="font-size:.78rem; padding:4px 6px;">
+                                                <?php for($i=1;$i<=5;$i++): ?>
+                                                    <option value="<?= $i ?>" <?= $i == $review['rating'] ? 'selected' : '' ?>>⭐ <?= $i ?></option>
+                                                <?php endfor; ?>
+                                            </select>
+                                        </div>
 
-                    </tbody>
+                                        <div style="margin-bottom:6px;">
+                                            <textarea name="komentar" rows="3"
+                                                      class="borrow-review-textarea"><?= htmlspecialchars($review['komentar']) ?></textarea>
+                                        </div>
 
-                </table>
-            </div>
+                                        <div style="display:flex; gap:.5rem; margin-top:4px;">
+                                            <button type="submit" class="borrow-btn-main" style="font-size:.72rem; padding:5px 12px;">
+                                                Simpan
+                                            </button>
+                                            <button type="button"
+                                                    class="borrow-btn-secondary"
+                                                    onclick="document.getElementById('edit<?= $review['id'] ?>').classList.add('hidden')">
+                                                Batal
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                            <?php else: ?>
+                                <span class="borrow-text-muted">-</span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+
+                <?php if (empty($peminjaman)): ?>
+                    <tr>
+                        <td colspan="6" style="padding:12px 10px; text-align:center;">
+                            <span class="borrow-text-muted">Belum ada peminjaman yang tercatat.</span>
+                        </td>
+                    </tr>
+                <?php endif; ?>
+
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -667,16 +763,16 @@ $peminjaman = $stmt->fetchAll();
     const penulis = opt.dataset.penulis || '';
 
     previewJudul.textContent   = judul;
-    previewPenulis.textContent = penulis ? 'Oleh: ' + penulis : '';
+    previewPenulis.textContent = penulis ? ('Oleh: ' + penulis) : '';
 
     if (cover) {
       previewCover.src = 'uploads/cover/' + cover;
-      previewCover.classList.remove('hidden');
-      previewNo.classList.add('hidden');
+      previewCover.style.display = 'block';
+      previewNo.style.display = 'none';
     } else {
       previewCover.src = '';
-      previewCover.classList.add('hidden');
-      previewNo.classList.remove('hidden');
+      previewCover.style.display = 'none';
+      previewNo.style.display = 'block';
     }
   }
 

@@ -29,375 +29,286 @@ foreach ($stmt->fetchAll() as $row) {
 ?>
 
 <style>
-    /* === CARD BUKU WATER THEME === */
-    .card-books {
-        background:
-            radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 55%),
-            radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.22), transparent 60%),
-            linear-gradient(160deg, rgba(15, 23, 42, 0.98), rgba(8, 47, 73, 0.98) 60%, rgba(15, 23, 42, 1));
-        border: 1px solid rgba(56, 189, 248, 0.45);
-        border-radius: 18px;
-        padding: 28px;
+    .page-wrapper-books {
+        margin-top: 1.5rem;
+    }
+
+    .books-card {
+        background: #020617;              /* dark, selaras header */
+        border-radius: 10px;
+        border: 1px solid #1f2937;        /* gray-800 */
+        padding: 18px 18px 20px;
         box-shadow:
-            0 24px 55px rgba(15, 23, 42, 0.95),
-            0 0 32px rgba(56, 189, 248, 0.4);
-        transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease, background .35s ease;
-        position: relative;
-        overflow: hidden;
-        backdrop-filter: blur(16px);
+            0 18px 35px rgba(15,23,42,0.9);
     }
 
-    .card-books::before {
-        content: "";
-        position: absolute;
-        inset: -40%;
-        background:
-            radial-gradient(circle at 20% 0%, rgba(125, 211, 252, 0.22), transparent 55%),
-            radial-gradient(circle at 80% 110%, rgba(56, 189, 248, 0.18), transparent 60%);
-        opacity: 0;
-        transition: opacity .5s ease;
-        pointer-events: none;
-        z-index: 0;
-    }
-
-    .card-books:hover {
-        transform: translateY(-6px);
-        box-shadow:
-            0 28px 65px rgba(8, 47, 73, 1),
-            0 0 45px rgba(56, 189, 248, 0.65);
-        border-color: rgba(56, 189, 248, 0.85);
-    }
-
-    .card-books:hover::before {
-        opacity: 1;
+    .books-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 14px;
     }
 
     .books-title {
-        font-size: 1.9rem;
-        font-weight: 800;
-        color: #e0f2fe;
-        text-shadow:
-            0 0 18px rgba(56, 189, 248, 0.8),
-            0 0 32px rgba(37, 99, 235, 0.7);
-        letter-spacing: 0.2em;
-        text-transform: uppercase;
-        position: relative;
-    }
-
-    .books-title::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: -6px;
-        width: 180px;
-        height: 3px;
-        border-radius: 999px;
-        background: linear-gradient(90deg, #0ea5e9, #38bdf8, #0ea5e9);
-        box-shadow: 0 0 14px rgba(56, 189, 248, 0.95);
-    }
-
-    /* BUTTON TAMBAH BUKU */
-    .btn-add {
-        background: linear-gradient(135deg, #0ea5e9, #2563eb);
-        color: #e0f2fe;
-        padding: 9px 22px;
-        border-radius: 9999px;
-        font-weight: 600;
-        font-size: 0.95rem;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #e5e7eb;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
-        box-shadow:
-            0 12px 28px rgba(37, 99, 235, 0.78),
-            0 0 24px rgba(56, 189, 248, 0.8);
+    }
+
+    .btn-add-book {
+        background: #2563eb;
+        color: #f9fafb;
+        padding: 7px 16px;
+        border-radius: 9999px;
+        font-size: .85rem;
+        font-weight: 600;
+        letter-spacing: .08em;
+        text-transform: uppercase;
         display: inline-flex;
         align-items: center;
         gap: 6px;
+        border: none;
     }
 
-    .btn-add:hover {
-        background: linear-gradient(135deg, #38bdf8, #1d4ed8);
-        transform: translateY(-2px);
-        box-shadow:
-            0 18px 38px rgba(30, 64, 175, 0.95),
-            0 0 32px rgba(56, 189, 248, 1);
+    .btn-add-book:hover {
+        background: #1d4ed8;
     }
 
-    .btn-add:active {
-        transform: translateY(0);
-        box-shadow:
-            0 10px 22px rgba(15, 23, 42, 0.9),
-            0 0 18px rgba(56, 189, 248, 0.7);
-    }
-
-    /* TABEL */
-    table {
-        background: radial-gradient(circle at top, rgba(15, 23, 42, 0.98), rgba(8, 47, 73, 0.96));
-        border-radius: 1rem;
+    .table-shell {
+        border-radius: 10px;
+        border: 1px solid #1f2937;
         overflow: hidden;
+        background: #020617;
     }
 
-    thead tr {
-        background:
-            radial-gradient(circle at top, rgba(56, 189, 248, 0.25), transparent 70%),
-            rgba(15, 23, 42, 0.98);
+    .book-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: .9rem;
+        color: #e5e7eb;
     }
 
-    thead th {
-        color: #e0f2fe;
-        font-weight: 700;
-        font-size: 0.85rem;
-        letter-spacing: 0.08em;
+    .book-table thead {
+        background: #030712;
+    }
+
+    .book-table th {
+        padding: 10px 12px;
+        font-size: .75rem;
         text-transform: uppercase;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.5);
+        letter-spacing: .08em;
+        color: #9ca3af;
+        text-align: left;
+        border-bottom: 1px solid #1f2937;
+        white-space: nowrap;
     }
 
-    tbody tr {
-        border-bottom: 1px solid rgba(30, 64, 175, 0.45);
-        transition: background .2s ease, box-shadow .2s ease, transform .15s ease;
+    .book-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #111827;
+        vertical-align: top;
     }
 
-    tbody tr:last-child {
+    .book-table tbody tr:last-child td {
         border-bottom: none;
     }
 
-    tbody tr:hover {
-        background:
-            radial-gradient(circle at left, rgba(56, 189, 248, 0.14), transparent 65%),
-            rgba(15, 23, 42, 0.98);
-        box-shadow:
-            0 0 18px rgba(56, 189, 248, 0.4),
-            0 0 12px rgba(15, 23, 42, 0.9);
-        transform: translateY(-1px);
+    .book-table tbody tr:hover {
+        background: #020617;
     }
 
-    td, th {
-        padding: 14px;
-        font-size: 0.97rem;
+    .cover-cell {
+        width: 3.5rem;
     }
 
-    td {
-        color: #dbeafe;
-    }
-
-    .text-gray-300 {
-        color: #bae6fd;
-    }
-
-    /* COVER */
     .cover-img {
-        box-shadow:
-            0 8px 18px rgba(15, 23, 42, 0.9),
-            0 0 18px rgba(56, 189, 248, 0.35);
-        border-radius: 0.6rem;
-        border: 1px solid rgba(15, 23, 42, 0.9);
+        height: 4.5rem;
+        width: 3rem;
+        border-radius: 6px;
+        border: 1px solid #111827;
+        object-fit: cover;
     }
 
     .no-img-box {
-        background: radial-gradient(circle at top, #1f2937, #020617);
-        border: 1px dashed rgba(148, 163, 184, 0.7);
-        box-shadow:
-            inset 0 0 12px rgba(15, 23, 42, 0.9),
-            0 0 10px rgba(15, 23, 42, 0.9);
+        height: 4.5rem;
+        width: 3rem;
+        border-radius: 6px;
+        border: 1px dashed #4b5563;
+        font-size: .7rem;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #020617;
     }
 
-    /* STOK COLORS */
     .stok-asli {
-        color: #e0f2fe;
-        text-shadow: 0 0 10px rgba(59, 130, 246, 0.7);
+        text-align: center;
+        font-weight: 600;
+        color: #e5e7eb;
     }
 
     .dipinjam {
-        color: #7dd3fc;
-        text-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
+        text-align: center;
+        font-weight: 600;
+        color: #93c5fd;
     }
 
     .badge-sisa {
+        display: inline-flex;
+        min-width: 2.2rem;
+        justify-content: center;
+        padding: 3px 8px;
+        border-radius: 9999px;
+        font-size: .75rem;
         font-weight: 600;
     }
 
-    /* AKSI LINK */
+    .badge-sisa-ok {
+        background: #064e3b;
+        color: #bbf7d0;
+        border: 1px solid #16a34a;
+    }
+
+    .badge-sisa-zero {
+        background: #7f1d1d;
+        color: #fee2e2;
+        border: 1px solid #ef4444;
+    }
+
+    .aksi-cell {
+        white-space: nowrap;
+        font-size: .85rem;
+    }
+
     .aksi-edit {
-        color: #7dd3fc;
+        color: #60a5fa;
         font-weight: 600;
-        position: relative;
-        padding-bottom: 2px;
-        transition: color .25s ease, text-shadow .25s ease, transform .15s ease;
-    }
-
-    .aksi-edit::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 0;
-        height: 2px;
-        border-radius: 999px;
-        background: linear-gradient(90deg, #38bdf8, #0ea5e9);
-        box-shadow: 0 0 8px rgba(56, 189, 248, 0.9);
-        transition: width .25s ease;
+        text-decoration: none;
+        margin-right: 8px;
     }
 
     .aksi-edit:hover {
-        color: #e0f2fe;
-        text-shadow:
-            0 0 12px rgba(56, 189, 248, 0.9),
-            0 0 18px rgba(37, 99, 235, 0.8);
-        transform: translateY(-1px);
-    }
-
-    .aksi-edit:hover::after {
-        width: 100%;
+        color: #bfdbfe;
     }
 
     .aksi-hapus {
         color: #fb7185;
         font-weight: 600;
-        position: relative;
-        padding-bottom: 2px;
-        transition: color .25s ease, text-shadow .25s ease, transform .15s ease;
-    }
-
-    .aksi-hapus::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 0;
-        height: 2px;
-        border-radius: 999px;
-        background: linear-gradient(90deg, #fb7185, #f97316);
-        box-shadow: 0 0 8px rgba(248, 113, 113, 0.9);
-        transition: width .25s ease;
+        text-decoration: none;
     }
 
     .aksi-hapus:hover {
         color: #fecaca;
-        text-shadow:
-            0 0 12px rgba(248, 113, 113, 0.95),
-            0 0 18px rgba(239, 68, 68, 0.8);
-        transform: translateY(-1px);
     }
 
-    .aksi-hapus:hover::after {
-        width: 100%;
+    .text-gray-300-books {
+        color: #d1d5db;
+        font-size: .88rem;
     }
 
-    /* WRAPPER TABEL */
-    .table-wrapper {
-        border-radius: 1rem;
-        border: 1px solid rgba(30, 64, 175, 0.65);
-        background: radial-gradient(circle at top, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 1));
-        box-shadow:
-            0 18px 40px rgba(15, 23, 42, 0.95),
-            0 0 30px rgba(30, 64, 175, 0.5);
-        position: relative;
-        overflow: hidden;
+    @media (max-width: 768px) {
+        .books-title {
+            font-size: 1.05rem;
+        }
+        .btn-add-book {
+            padding: 6px 12px;
+            font-size: .75rem;
+        }
     }
 </style>
 
-<div class="card-books mt-10">
+<div class="page-wrapper-books">
+    <div class="books-card">
 
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6 relative z-10">
-        <h2 class="books-title">Daftar Buku</h2>
+        <div class="books-header">
+            <h2 class="books-title">Daftar Buku</h2>
 
-        <a href="book_add.php" class="btn-add">
-            <span>+</span>
-            <span>Tambah Buku</span>
-        </a>
+            <a href="book_add.php" class="btn-add-book">
+                <span>+</span>
+                <span>Buku</span>
+            </a>
+        </div>
+
+        <div class="overflow-x-auto">
+            <div class="table-shell">
+                <table class="book-table">
+                    <thead>
+                        <tr>
+                            <th>Cover</th>
+                            <th>Judul</th>
+                            <th>Penulis</th>
+                            <th>Penerbit</th>
+                            <th class="text-center">Stok</th>
+                            <th class="text-center">Dipinjam</th>
+                            <th class="text-center">Sisa</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach($books as $b):
+                        $stok_asli   = intval($b['stok']);
+                        $jml_dipinjam = $dipped[$b['id']] ?? 0;
+                        $tersisa     = max($stok_asli - $jml_dipinjam, 0);
+                    ?>
+                        <tr>
+                            <td class="cover-cell">
+                                <?php if(!empty($b['cover'])): ?>
+                                    <img
+                                        src="uploads/cover/<?= htmlspecialchars($b['cover']) ?>"
+                                        alt="Cover"
+                                        class="cover-img"
+                                    >
+                                <?php else: ?>
+                                    <div class="no-img-box">No Img</div>
+                                <?php endif; ?>
+                            </td>
+
+                            <td class="font-semibold">
+                                <?= htmlspecialchars($b['judul']) ?>
+                            </td>
+
+                            <td class="text-gray-300-books">
+                                <?= htmlspecialchars($b['penulis']) ?>
+                            </td>
+
+                            <td class="text-gray-300-books">
+                                <?= htmlspecialchars($b['penerbit']) ?>
+                            </td>
+
+                            <td class="stok-asli">
+                                <?= $stok_asli ?>
+                            </td>
+
+                            <td class="dipinjam">
+                                <?= $jml_dipinjam ?>
+                            </td>
+
+                            <td style="text-align:center;">
+                                <span class="badge-sisa <?= $tersisa > 0 ? 'badge-sisa-ok' : 'badge-sisa-zero' ?>">
+                                    <?= $tersisa ?>
+                                </span>
+                            </td>
+
+                            <td class="aksi-cell">
+                                <a href="book_edit.php?id=<?= $b['id'] ?>" class="aksi-edit">Edit</a>
+                                <a href="books.php?delete=<?= $b['id'] ?>"
+                                   onclick="return confirm('Hapus buku ini?')"
+                                   class="aksi-hapus">
+                                    Hapus
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
-
-    <!-- Tabel -->
-    <div class="overflow-x-auto table-wrapper">
-        <table class="w-full text-left text-gray-200 border-collapse">
-
-            <thead class="border-b border-gray-600/40">
-                <tr>
-                    <th>Cover</th>
-                    <th>Judul</th>
-                    <th>Penulis</th>
-                    <th>Penerbit</th>
-                    <th class="text-center">Stok Asli</th>
-                    <th class="text-center">Dipinjam</th>
-                    <th class="text-center">Tersisa</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-
-            <tbody>
-            <?php foreach($books as $b):
-                $stok_asli = intval($b['stok']);
-                $jml_dipinjam = $dipped[$b['id']] ?? 0;
-                $tersisa = max($stok_asli - $jml_dipinjam, 0);
-            ?>
-                <tr>
-
-                    <!-- Cover -->
-                    <td>
-                        <?php if(!empty($b['cover'])): ?>
-                            <img src="uploads/cover/<?= htmlspecialchars($b['cover']) ?>"
-                                 class="h-16 w-12 object-cover cover-img">
-                        <?php else: ?>
-                            <div class="h-16 w-12 rounded flex items-center justify-center text-gray-400 text-xs no-img-box">
-                                No Img
-                            </div>
-                        <?php endif; ?>
-                    </td>
-
-                    <!-- Judul -->
-                    <td class="font-semibold">
-                        <?= htmlspecialchars($b['judul']) ?>
-                    </td>
-
-                    <!-- Penulis -->
-                    <td class="text-gray-300">
-                        <?= htmlspecialchars($b['penulis']) ?>
-                    </td>
-
-                    <!-- Penerbit -->
-                    <td class="text-gray-300">
-                        <?= htmlspecialchars($b['penerbit']) ?>
-                    </td>
-
-                    <!-- Stok Asli -->
-                    <td class="text-center font-bold stok-asli">
-                        <?= $stok_asli ?>
-                    </td>
-
-                    <!-- Dipinjam -->
-                    <td class="text-center font-bold dipinjam">
-                        <?= $jml_dipinjam ?>
-                    </td>
-
-                    <!-- Tersisa -->
-                    <td class="text-center">
-                        <span class="px-3 py-1 rounded-full text-sm badge-sisa
-                            <?= $tersisa > 0 
-                                ? 'bg-green-900/40 text-green-300 border border-green-600/40' 
-                                : 'bg-red-900/40 text-red-300 border border-red-600/40' ?>">
-                            <?= $tersisa ?>
-                        </span>
-                    </td>
-
-                    <!-- Aksi -->
-                    <td class="space-x-4">
-                        <a href="book_edit.php?id=<?= $b['id'] ?>" class="aksi-edit">Edit</a>
-
-                        <a href="books.php?delete=<?= $b['id'] ?>"
-                           onclick="return confirm('Hapus buku ini?')"
-                           class="aksi-hapus">
-                            Hapus
-                        </a>
-                    </td>
-
-                </tr>
-            <?php endforeach; ?>
-            </tbody>
-
-        </table>
-    </div>
-
 </div>
 
 <?php require_once __DIR__.'/../templates/footer.php'; ?>

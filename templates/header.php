@@ -15,22 +15,15 @@ $user = $auth->user();
 
   <style>
     body {
-        background: radial-gradient(circle at top, #0b3a57 0, #020617 45%, #020617 100%);
-        color: #e0f2fe;
-        font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        background: #020617; /* biru gelap sederhana */
+        color: #e5e7eb;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
-    /* NAVBAR WATER THEME */
-    .nav-water {
-        background:
-          radial-gradient(circle at 10% 0, rgba(56, 189, 248, 0.25), transparent 55%),
-          radial-gradient(circle at 90% 120%, rgba(37, 99, 235, 0.3), transparent 60%),
-          rgba(15, 23, 42, 0.95);
-        backdrop-filter: blur(18px);
-        border-bottom: 1px solid rgba(56, 189, 248, 0.4);
-        box-shadow:
-          0 18px 45px rgba(15, 23, 42, 0.9),
-          0 0 35px rgba(56, 189, 248, 0.4);
+    /* NAVBAR SEDERHANA */
+    .nav-bar {
+        background: #020617;
+        border-bottom: 1px solid #1f2937;
     }
 
     .nav-inner {
@@ -38,145 +31,100 @@ $user = $auth->user();
     }
 
     .nav-logo {
-        letter-spacing: 0.2em;
+        letter-spacing: 0.15em;
         text-transform: uppercase;
-        color: #e0f2fe;
-        text-shadow:
-          0 0 14px rgba(56, 189, 248, 0.75),
-          0 0 28px rgba(37, 99, 235, 0.7);
-        position: relative;
+        color: #e5e7eb;
+        font-size: 1rem;
+        font-weight: 700;
     }
 
-    .nav-logo::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: -4px;
-        width: 55%;
-        height: 2px;
+    .nav-links a {
+        font-size: 0.9rem;
+        color: #cbd5f5;
+        padding: 0.25rem 0.5rem;
         border-radius: 999px;
-        background: linear-gradient(90deg, #0ea5e9, #38bdf8, #0ea5e9);
-        box-shadow: 0 0 10px rgba(56, 189, 248, 0.9);
+    }
+
+    .nav-links a:hover {
+        background: #111827;
+        color: #e5e7eb;
     }
 
     .nav-user-chip {
-        background: radial-gradient(circle at top, rgba(56, 189, 248, 0.35), rgba(15, 23, 42, 0.95));
-        border-radius: 9999px;
-        border: 1px solid rgba(56, 189, 248, 0.6);
-        box-shadow:
-          0 12px 30px rgba(15, 23, 42, 0.9),
-          0 0 20px rgba(56, 189, 248, 0.6);
+        font-size: 0.8rem;
+        background: #0b1120;
+        border-radius: 999px;
+        padding: 0.25rem 0.75rem;
+        border: 1px solid #1f2937;
     }
 
     .nav-user-role {
-        color: #7dd3fc;
-        text-shadow: 0 0 8px rgba(56, 189, 248, 0.9);
-    }
-
-    .nav-link {
-        position: relative;
-        font-weight: 500;
-        font-size: 0.95rem;
-        color: #bae6fd;
-        transition: color .25s ease, transform .25s ease;
-    }
-
-    .nav-link::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: -4px;
-        width: 0;
-        height: 2px;
-        border-radius: 999px;
-        background: linear-gradient(90deg, #38bdf8, #0ea5e9);
-        box-shadow: 0 0 8px rgba(56, 189, 248, 0.9);
-        transition: width .25s ease;
-    }
-
-    .nav-link:hover {
-        color: #e0f2fe;
-        transform: translateY(-1px);
-    }
-
-    .nav-link:hover::after {
-        width: 100%;
+        color: #93c5fd;
+        font-style: italic;
+        font-size: 0.75rem;
     }
 
     .nav-logout {
-        font-weight: 600;
-        font-size: 0.95rem;
-        color: #fb7185;
-        text-shadow: 0 0 8px rgba(248, 113, 113, 0.9);
-        transition: color .25s ease, transform .25s ease, text-shadow .25s ease;
+        font-size: 0.85rem;
+        color: #fca5a5;
     }
 
     .nav-logout:hover {
         color: #fecaca;
-        transform: translateY(-1px);
-        text-shadow:
-          0 0 12px rgba(248, 113, 113, 1),
-          0 0 20px rgba(239, 68, 68, 0.8);
     }
   </style>
 </head>
 
 <body class="min-h-screen">
 
-<nav class="nav-water">
-  <div class="container mx-auto px-4 py-4 flex justify-between items-center nav-inner">
+<nav class="nav-bar">
+  <div class="container mx-auto px-4 py-3 flex justify-between items-center nav-inner">
 
     <!-- LOGO -->
-    <a href="index.php"
-       class="nav-logo font-bold text-xl sm:text-2xl tracking-[0.25em]">
+    <a href="index.php" class="nav-logo">
       PERPUSTAKAAN DIGITAL
     </a>
 
-    <div class="flex items-center space-x-6">
+    <?php if($user): ?>
+    <div class="flex items-center space-x-4 nav-links">
 
-      <?php if($user): ?>
+      <!-- USER INFO -->
+      <span class="nav-user-chip flex items-center space-x-2">
+        <span>Halo, <?= htmlspecialchars($user['nama'] ?: $user['username']) ?></span>
+        <span class="nav-user-role"><?= htmlspecialchars($user['role']) ?></span>
+      </span>
 
-        <!-- USER INFO -->
-        <span class="nav-user-chip font-semibold text-xs sm:text-sm py-1.5 px-3 sm:px-4 flex items-center gap-1">
-          <span>Halo, <?= htmlspecialchars($user['nama'] ?: $user['username']) ?></span>
-          <span class="mx-1">•</span>
-          <span class="nav-user-role italic text-xs">
-            <?= htmlspecialchars($user['role']) ?>
-          </span>
-        </span>
+      <?php
+        // fungsi helper link
+        function navlink($href, $text) {
+          return "<a href=\"$href\">$text</a>";
+        }
+      ?>
 
-        <!-- NAV LINK FUNCTION -->
-        <?php
-          function navlink($href, $text) {
-            return "<a href='$href' class=\"nav-link\">$text</a>";
-          }
-        ?>
+      <?= navlink('index.php', 'Home'); ?>
 
-        <?= navlink('index.php', 'Home'); ?>
-
-        <?php if (in_array($user['role'], ['administrator', 'petugas'])): ?>
-          <?= navlink('books.php', 'Pendataan Buku'); ?>
-        <?php endif; ?>
-
-        <?php if ($user['role'] === 'peminjam'): ?>
-          <?= navlink('borrow.php', 'Peminjaman'); ?>
-        <?php endif; ?>
-
-        <?php if ($user['role'] === 'administrator'): ?>
-          <?= navlink('admin_users.php', 'Manajemen User'); ?>
-          <?= navlink('reports.php', 'Laporan'); ?>
-
-        <?php elseif ($user['role'] === 'petugas'): ?>
-          <?= navlink('reports.php', 'Laporan'); ?>
-        <?php endif; ?>
-
-        <!-- LOGOUT -->
-        <a href="logout.php" class="nav-logout">
-          Logout
-        </a>
-
+      <?php if (in_array($user['role'], ['administrator', 'petugas'])): ?>
+        <?= navlink('books.php', 'Pendataan Buku'); ?>
       <?php endif; ?>
+
+      <?php if ($user['role'] === 'peminjam'): ?>
+        <?= navlink('borrow.php', 'Peminjaman'); ?>
+      <?php endif; ?>
+
+      <?php if ($user['role'] === 'administrator'): ?>
+        <?= navlink('admin_users.php', 'Manajemen User'); ?>
+        <?= navlink('reports.php', 'Laporan'); ?>
+      <?php elseif ($user['role'] === 'petugas'): ?>
+        <?= navlink('reports.php', 'Laporan'); ?>
+      <?php endif; ?>
+
+      <!-- LOGOUT -->
+      <a href="logout.php" class="nav-logout">
+        Logout
+      </a>
+
     </div>
+    <?php endif; ?>
 
   </div>
 </nav>

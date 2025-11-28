@@ -4,7 +4,7 @@ $auth = new Auth($db->pdo());
 $auth->requireRole(['administrator']);
 $userModel = new UserModel($db->pdo());
 
-$id = intval($_GET['id'] ?? 0);
+$id   = intval($_GET['id'] ?? 0);
 $user = $userModel->find($id);
 
 if(!$user){
@@ -42,215 +42,172 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
 ?>
 
 <style>
-    /* === CARD EDIT ADMIN WATER THEME === */
-    .card-shinigami {
-        background:
-            radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 55%),
-            radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.22), transparent 60%),
-            linear-gradient(160deg, rgba(15, 23, 42, 0.98), rgba(8, 47, 73, 0.98) 60%, rgba(15, 23, 42, 1));
-        border-radius: 20px;
-        padding: 28px;
-        box-shadow:
-            0 24px 55px rgba(15, 23, 42, 0.95),
-            0 0 32px rgba(56, 189, 248, 0.4);
-        backdrop-filter: blur(16px);
-        transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease, background .35s ease;
-        border: 1px solid rgba(56, 189, 248, 0.55);
-        position: relative;
-        overflow: hidden;
-        margin-top: 2.5rem;
+    .page-wrapper {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding-top: 2.5rem;
     }
 
-    .card-shinigami::before {
-        content: "";
-        position: absolute;
-        inset: -40%;
-        background:
-            radial-gradient(circle at 15% 0%, rgba(125, 211, 252, 0.28), transparent 55%),
-            radial-gradient(circle at 90% 100%, rgba(37, 99, 235, 0.28), transparent 60%);
-        opacity: 0;
-        transition: opacity .5s ease;
-        pointer-events: none;
-        z-index: 0;
-    }
-
-    .card-shinigami:hover {
-        box-shadow:
-            0 28px 65px rgba(8, 47, 73, 1),
-            0 0 45px rgba(56, 189, 248, 0.7);
-        transform: translateY(-6px);
-        border-color: rgba(56, 189, 248, 0.9);
-    }
-
-    .card-shinigami:hover::before {
-        opacity: 1;
-    }
-
-    /* HEADER */
-    .edit-title-water {
-        font-size: 1.9rem;
-        font-weight: 800;
-        color: #e0f2fe;
-        text-shadow:
-            0 0 18px rgba(56, 189, 248, 0.9),
-            0 0 30px rgba(37, 99, 235, 0.8);
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        position: relative;
-    }
-
-    .edit-title-water::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: -8px;
-        width: 160px;
-        height: 3px;
-        border-radius: 999px;
-        background: linear-gradient(90deg, #0ea5e9, #38bdf8, #0ea5e9);
-        box-shadow: 0 0 14px rgba(56, 189, 248, 0.95);
-    }
-
-    .sh-back {
-        color: #bae6fd;
-        font-size: 0.85rem;
-        transition: color .25s ease, text-shadow .25s ease, transform .15s ease;
-    }
-
-    .sh-back:hover {
-        color: #e0f2fe;
-        text-shadow:
-            0 0 10px rgba(56, 189, 248, 0.9),
-            0 0 14px rgba(37, 99, 235, 0.7);
-        transform: translateY(-1px);
-    }
-
-    /* INPUT, TEXTAREA, SELECT */
-    .sh-label {
-        font-size: 0.9rem;
-        color: #bae6fd;
-        font-weight: 500;
-    }
-
-    .sh-input {
-        background: rgba(15, 23, 42, 0.95);
-        border: 1px solid rgba(148, 163, 184, 0.6);
-        color: #e0f2fe;
-        padding: 10px 12px;
-        border-radius: 0.75rem;
+    .edit-card {
         width: 100%;
-        margin-top: 5px;
-        font-size: 0.95rem;
-        transition: border-color .3s ease, box-shadow .3s ease, background .3s ease, transform .2s ease;
+        max-width: 520px;
+        background: #020617;          /* very dark */
+        border: 1px solid #1f2937;    /* gray-800 */
+        border-radius: 10px;
+        padding: 20px 18px 22px;
     }
 
-    .sh-input::placeholder {
-        color: #64748b;
+    .edit-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
     }
 
-    .sh-input:focus {
+    .edit-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #e5e7eb;              /* gray-200 */
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .edit-back {
+        font-size: .85rem;
+        color: #93c5fd;
+    }
+
+    .edit-back:hover {
+        color: #bfdbfe;
+        text-decoration: underline;
+    }
+
+    .edit-label {
+        display: block;
+        font-size: .9rem;
+        color: #e5e7eb;
+        margin-bottom: 4px;
+    }
+
+    .edit-input,
+    .edit-textarea,
+    .edit-select {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: 1px solid #374151;   /* gray-700 */
+        background: #020617;
+        color: #e5e7eb;
+        font-size: .9rem;
+    }
+
+    .edit-input:focus,
+    .edit-textarea:focus,
+    .edit-select:focus {
         outline: none;
-        border-color: #38bdf8;
-        box-shadow:
-            0 0 0 1px rgba(56, 189, 248, 0.9),
-            0 0 18px rgba(56, 189, 248, 0.7);
-        background: radial-gradient(circle at top, rgba(15, 23, 42, 1), rgba(8, 47, 73, 0.95));
-        transform: translateY(-1px);
+        border-color: #60a5fa;       /* blue-400 */
+        box-shadow: 0 0 0 1px #60a5fa;
     }
 
-    textarea.sh-input {
-        min-height: 90px;
+    .edit-textarea {
+        min-height: 80px;
         resize: vertical;
     }
 
-    select.sh-input {
-        cursor: pointer;
-    }
-
-    /* BUTTON SUBMIT */
-    .sh-btn {
+    .edit-btn {
         width: 100%;
-        padding: 11px;
-        background: linear-gradient(135deg, #0ea5e9, #2563eb);
-        color: #e0f2fe;
-        border-radius: 9999px;
-        font-size: 0.95rem;
-        font-weight: 700;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
-        margin-top: 1.5rem;
-        box-shadow:
-            0 14px 34px rgba(37, 99, 235, 0.8),
-            0 0 28px rgba(56, 189, 248, 0.8);
+        margin-top: 18px;
+        padding: 9px 10px;
+        border-radius: 6px;
+        background: #2563eb;         /* blue-600 */
+        color: #f9fafb;
+        font-weight: 600;
+        font-size: .95rem;
     }
 
-    .sh-btn:hover {
-        background: linear-gradient(135deg, #38bdf8, #1d4ed8);
-        transform: translateY(-2px);
-        box-shadow:
-            0 18px 40px rgba(30, 64, 175, 0.95),
-            0 0 36px rgba(56, 189, 248, 1);
-    }
-
-    .sh-btn:active {
-        transform: translateY(0);
-        box-shadow:
-            0 10px 22px rgba(15, 23, 42, 0.9),
-            0 0 20px rgba(56, 189, 248, 0.7);
+    .edit-btn:hover {
+        background: #1d4ed8;
     }
 </style>
 
-<div class="max-w-lg mx-auto card-shinigami">
+<div class="page-wrapper px-4">
+    <div class="edit-card">
 
-  <!-- HEADER + BUTTON BACK -->
-  <div class="flex justify-between items-center mb-4 relative z-10">
-      <h2 class="edit-title-water">Edit Akun</h2>
+        <div class="edit-header">
+            <h2 class="edit-title">Edit Akun</h2>
+            <a href="admin_users.php" class="edit-back">← Kembali</a>
+        </div>
 
-      <a href="admin_users.php" class="sh-back">← Kembali</a>
-  </div>
+        <form method="post">
 
-  <form method="post" class="relative z-10">
+            <div class="mb-3">
+                <label class="edit-label">Username</label>
+                <input
+                    name="username"
+                    class="edit-input"
+                    value="<?= htmlspecialchars($user['username']) ?>"
+                    required
+                >
+            </div>
 
-    <label class="block sh-label">Username
-      <input name="username" class="sh-input"
-             value="<?= htmlspecialchars($user['username']) ?>" required>
-    </label>
+            <div class="mb-3">
+                <label class="edit-label">Password (opsional)</label>
+                <input
+                    type="password"
+                    name="password"
+                    class="edit-input"
+                    placeholder="Biarkan kosong jika tidak diubah"
+                >
+            </div>
 
-    <label class="block sh-label mt-3">Password (opsional)
-      <input type="password" name="password"
-             class="sh-input"
-             placeholder="Biarkan kosong jika tidak diubah">
-    </label>
+            <div class="mb-3">
+                <label class="edit-label">Nama Lengkap</label>
+                <input
+                    name="nama_lengkap"
+                    class="edit-input"
+                    value="<?= htmlspecialchars($user['nama_lengkap']) ?>"
+                >
+            </div>
 
-    <label class="block sh-label mt-3">Nama Lengkap
-      <input name="nama_lengkap" class="sh-input"
-             value="<?= htmlspecialchars($user['nama_lengkap']) ?>">
-    </label>
+            <div class="mb-3">
+                <label class="edit-label">Email</label>
+                <input
+                    type="email"
+                    name="email"
+                    class="edit-input"
+                    value="<?= htmlspecialchars($user['email']) ?>"
+                >
+            </div>
 
-    <label class="block sh-label mt-3">Email
-      <input type="email" name="email" class="sh-input"
-             value="<?= htmlspecialchars($user['email']) ?>">
-    </label>
+            <div class="mb-3">
+                <label class="edit-label">Alamat</label>
+                <textarea
+                    name="alamat"
+                    class="edit-textarea"
+                    rows="3"
+                ><?= htmlspecialchars($user['alamat']) ?></textarea>
+            </div>
 
-    <label class="block sh-label mt-3">Alamat
-      <textarea name="alamat" class="sh-input"
-                rows="3"><?= htmlspecialchars($user['alamat']) ?></textarea>
-    </label>
+            <div class="mb-3">
+                <label class="edit-label">Role</label>
+                <select name="role" class="edit-select">
+                    <option value="administrator" <?= $user['role']=='administrator'?'selected':'' ?>>
+                        Administrator
+                    </option>
+                    <option value="petugas" <?= $user['role']=='petugas'?'selected':'' ?>>
+                        Petugas
+                    </option>
+                </select>
+            </div>
 
-    <label class="block sh-label mt-3">Role
-      <select name="role" class="sh-input">
-        <option value="administrator" <?= $user['role']=='administrator'?'selected':'' ?>>Administrator</option>
-        <option value="petugas" <?= $user['role']=='petugas'?'selected':'' ?>>Petugas</option>
-      </select>
-    </label>
+            <button class="edit-btn">
+                Update Akun
+            </button>
 
-    <button class="sh-btn">
-      Update Akun
-    </button>
-
-  </form>
-
+        </form>
+    </div>
 </div>
 
 <?php require_once __DIR__.'/../templates/footer.php'; ?>
