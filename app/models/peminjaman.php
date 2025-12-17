@@ -1,14 +1,17 @@
 <?php
 
+// app/Models/Peminjaman.php
+// Model yang mengelola proses pinjam & pengembalian buku
+
 class PeminjamanModel {
-    private $db;
+    private $db; // koneksi database
 
     public function __construct($db){
         $this->db = $db;
     }
 
-    /**
-     * Ambil semua data peminjaman untuk laporan (dengan filter)
+    /*
+      Ambil semua data peminjaman untuk laporan (dengan filter date range)
      */
     public function reportAll($from = null, $to = null){
         $sql = "
@@ -21,11 +24,13 @@ class PeminjamanModel {
 
         $params = [];
 
+        // Filter dari tanggal tertentu
         if ($from) {
             $sql .= " AND p.created_at >= ?";
             $params[] = $from;
         }
 
+        // Filter sampai tanggal tertentu
         if ($to) {
             $sql .= " AND p.created_at <= ?";
             $params[] = $to;
@@ -39,9 +44,9 @@ class PeminjamanModel {
         return $stmt->fetchAll();
     }
 
-    /**
-     * Ambil semua peminjaman (untuk halaman borrow.php / admin)
-     */
+    /*
+      Ambil semua peminjaman + username + judul buku
+    */
     public function all(){
         $stmt = $this->db->prepare("
             SELECT p.*, u.username, b.judul, b.cover
@@ -54,9 +59,9 @@ class PeminjamanModel {
         return $stmt->fetchAll();
     }
 
-    /**
-     * Cari peminjaman berdasarkan ID
-     */
+    /*
+      Ambil detail peminjaman berdasarkan ID
+    */
     public function find($id){
         $stmt = $this->db->prepare("
             SELECT p.*, u.username, b.judul, b.cover
@@ -69,16 +74,12 @@ class PeminjamanModel {
         return $stmt->fetch();
     }
 
-    /**
-     * Tambah peminjaman
-     * Return:
-     *   - "OK"
-     *   - "STOK_HABIS"
-     *   - "SUDAH_DIPINJAM"
-     */
-    public function borrow($user_id, $buku_id, $tanggal_pinjam){
+    // ===========================================
+    //  Tambah peminjaman (dengan tanggal tenggat)
+    // ===========================================
+    public function borrow($user_id, $buku_id, $tanggal_pinjam, $tanggal_tenggat = null){
 
-        // CEK apakah user sudah meminjam buku ini dan BELUM mengembalikan
+        // Cek apakah user sudah meminjam buku ini
         $stmt = $this->db->prepare("
             SELECT COUNT(*) FROM peminjaman
             WHERE user_id = ? AND buku_id = ? AND status = 'dipinjam'
@@ -90,7 +91,7 @@ class PeminjamanModel {
             return "SUDAH_DIPINJAM";
         }
 
-        // CEK STOK
+        // Cek stok buku
         $stmt = $this->db->prepare("SELECT stok FROM buku WHERE id = ?");
         $stmt->execute([$buku_id]);
         $stok = $stmt->fetchColumn();
@@ -99,27 +100,32 @@ class PeminjamanModel {
             return "STOK_HABIS";
         }
 
-        // INSERT PEMINJAMAN
-        $stmt = $this->db->prepare("
-            INSERT INTO peminjaman (user_id, buku_id, tanggal_pinjam, status)
-            VALUES (?, ?, ?, 'dipinjam')
-        ");
-        $stmt->execute([$user_id, $buku_id, $tanggal_pinjam]);
+        // Jika tanggal_tenggat tidak diisi, buat default +7 hari dari tanggal_pinjam
+        if (empty($tanggal_tenggat)) {
+            $tanggal_tenggat = date('Y-m-d', strtotime($tanggal_pinjam . ' +7 days'));
+        }
 
-        // KURANGI STOK
+        // Insert peminjaman baru
+        $stmt = $this->db->prepare("
+            INSERT INTO peminjaman (user_id, buku_id, tanggal_pinjam, tanggal_tenggat, status)
+            VALUES (?, ?, ?, ?, 'dipinjam')
+        ");
+        $stmt->execute([$user_id, $buku_id, $tanggal_pinjam, $tanggal_tenggat]);
+
+        // Kurangi stok buku
         $stmt = $this->db->prepare("UPDATE buku SET stok = stok - 1 WHERE id = ?");
         $stmt->execute([$buku_id]);
 
         return "OK";
     }
 
-    /**
-     * Kembalikan buku
-     * - Cek status dulu biar stok gak nambah dua kali
+    /*
+      Kembalikan buku
+      Cek dulu apakah sudah dikembalikan sebelumnya, agar stok tidak double(kemarin ada bug soalnya)
      */
     public function returnBook($id, $tanggal_kembali){
 
-        // Ambil info peminjaman
+        // Ambil data peminjaman berdasarkan ID
         $stmt = $this->db->prepare("
             SELECT buku_id, status
             FROM peminjaman
@@ -129,18 +135,18 @@ class PeminjamanModel {
         $row = $stmt->fetch();
 
         if (!$row) {
-            return false; // peminjaman tidak ditemukan
+            return false; // tidak ditemukan
         }
 
         $buku_id     = $row['buku_id'];
         $status_lama = $row['status'];
 
-        // Kalau sudah 'dikembalikan', jangan ubah stok lagi
+        // Jika sudah dikembalikan sebelumnya, jangan tambah stok lagi
         if ($status_lama === 'dikembalikan') {
             return false;
         }
 
-        // Update status peminjaman
+        // Update status peminjaman menjadi dikembalikan
         $stmt = $this->db->prepare("
             UPDATE peminjaman
             SET status = 'dikembalikan', tanggal_kembali = ?
@@ -148,7 +154,7 @@ class PeminjamanModel {
         ");
         $stmt->execute([$tanggal_kembali, $id]);
 
-        // Tambah stok kembali (1x saja)
+        // Tambahkan stok buku kembali
         if ($buku_id) {
             $stmt = $this->db->prepare("UPDATE buku SET stok = stok + 1 WHERE id = ?");
             $stmt->execute([$buku_id]);
